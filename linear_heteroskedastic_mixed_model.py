@@ -562,12 +562,15 @@ def learn_models_chr(args):
     null_h2=null[0][n_fixed_variance]
     null_mle=np.hstack((alpha_null,null[0]))
     print('Calculating Standard Errors')
-    if args.full_cov:
-        null_mle_se=parameter_covariance(null_mle,y,fixed_mean,fixed_variance,G,1e-6)[0]
-    else:
-        null_mle_se=np.zeros((n_fixed_mean+n_fixed_variance))
-        null_mle_se[0:n_fixed_mean]=np.sqrt(np.diag(lhm.alpha_cov(fixed_mean,fixed_variance,beta_null)))
-        null_mle_se[n_fixed_mean:(n_fixed_mean+n_fixed_variance)]=np.sqrt(np.diag(lhm.beta_cov(fixed_variance)))
+    # if args.full_cov:
+    #     null_mle_se=parameter_covariance(null_mle,y,fixed_mean,fixed_variance,G,1e-6)[0]
+    # else:
+    #     null_mle_se=np.zeros((n_fixed_mean+n_fixed_variance))
+    #     null_mle_se[0:n_fixed_mean]=np.sqrt(np.diag(lhm.alpha_cov(fixed_mean,fixed_variance,beta_null)))
+    #     null_mle_se[n_fixed_mean:(n_fixed_mean+n_fixed_variance)]=np.sqrt(np.diag(lhm.beta_cov(fixed_variance)))
+    null_mle_se=np.zeros((n_fixed_mean+n_fixed_variance))
+    null_mle_se[0:n_fixed_mean]=np.sqrt(np.diag(lhm.alpha_cov(fixed_mean,fixed_variance,beta_null)))
+    null_mle_se[n_fixed_mean:(n_fixed_mean+n_fixed_variance)]=np.sqrt(np.diag(lhm.beta_cov(fixed_variance)))
     # Get print out for fixed mean effects
     alpha_out=np.zeros((n_fixed_mean,2))
     alpha_out[:,0]=alpha_null
