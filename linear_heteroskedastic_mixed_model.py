@@ -344,7 +344,7 @@ def parameter_covariance(pars,y,X,V,G,dx):
     H[n_pars-1,n_pars-1]=(grad_h2(h2+dx,G,V,D_inv,G_cov,resid,Lambda_inv_upper)-grad_h2(h2-dx,G,V,D_inv,G_cov,resid,Lambda_inv_lower))/(2.0*dx)
     par_cov=np.linalg.inv(0.5*H)
     par_se=np.sqrt(np.diag(par_cov))
-    code.interact(local=locals())
+    #code.interact(local=locals())
     return [par_se,par_cov]
 
 def parameter_covariance_old(pars,y,X,V,G,dx):
