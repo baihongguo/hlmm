@@ -22,4 +22,5 @@ for i in xrange(0,n_loci):
     command+='--mean_covar '+lv+'covariates.hdf5 '
     command+='--variance_covar '+lv+'covariates.hdf5 '
     command+='--full_cov'
+    print(command)
     os.system(command)
