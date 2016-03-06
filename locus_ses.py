@@ -9,7 +9,7 @@ n_loci=len(chrs)
 geno_prefix='/well/donnelly/ukbiobank_project_8874/ay/genotypes/chr.'
 geno_suffix='.hdf5'
 
-sample='diverse'
+sample='british'
 lv='/well/donnelly/ukbiobank_project_8874/ay/linear_variance/'+sample+'/'
 
 for i in xrange(1,n_loci):
