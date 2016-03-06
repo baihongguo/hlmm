@@ -12,7 +12,7 @@ geno_suffix='.hdf5'
 sample='diverse'
 lv='/well/donnelly/ukbiobank_project_8874/ay/linear_variance/'+sample+'/'
 
-for i in xrange(1,n_loci):
+for i in xrange(0,1):
     command='python /well/donnelly/glmm/python/linear_heteroskedastic_mixed_model.py '
     command+=geno_prefix+str(chrs[i])+geno_suffix+' '
     command+=str(snp_indices[i])+' '+str(snp_indices[i]+2)+' '
@@ -23,3 +23,7 @@ for i in xrange(1,n_loci):
     command+='--variance_covar '+lv+'covariates.hdf5 '
     command+='--full_cov'
     os.system(command)
+
+
+rsids=c('rs2814992','rs1652376','rs61587156','rs957919','rs6831020',
+       'rs9469488','rs4441044','rs2785980','rs1421085','rs6548238','rs1800437','rs6265','rs7903146')
