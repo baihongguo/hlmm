@@ -344,7 +344,7 @@ def parameter_covariance(pars,y,X,V,G,dx):
     H[n_pars-1,n_pars-1]=(grad_h2(h2+dx,G,V,D_inv,G_cov,resid,Lambda_inv_upper)-grad_h2(h2-dx,G,V,D_inv,G_cov,resid,Lambda_inv_lower))/(2.0*dx)
     par_cov=np.linalg.inv(0.5*H)
     par_se=np.sqrt(np.diag(par_cov))
-    code.interact(local=locals())
+    #code.interact(local=locals())
     return [par_se,par_cov]
 
 def parameter_covariance_old(pars,y,X,V,G,dx):
@@ -672,12 +672,13 @@ def learn_models_chr(args):
                 alpha_additive=alpha_mle_final(additive[0],y_l, X_l, V_l, G_l)
                 beta_additive=additive[0][0:n_fixed_variance]
                 # Estimate standard errors
-                if args.full_cov:
-                    additive_pars=np.hstack((alpha_additive,additive[0]))
-                    additive_par_cov=parameter_covariance(additive_pars,y_l, X_l, V_l, G_l,1e-6)
-                    additive_se=additive_par_cov[0]
-                else:
-                    additive_se=np.sqrt(np.diag(lhm.alpha_cov(X_l,V_l,beta_additive)))
+                # if args.full_cov:
+                #     additive_pars=np.hstack((alpha_additive,additive[0]))
+                #     additive_par_cov=parameter_covariance(additive_pars,y_l, X_l, V_l, G_l,1e-6)
+                #     additive_se=additive_par_cov[0]
+                # else:
+                #     additive_se=np.sqrt(np.diag(lhm.alpha_cov(X_l,V_l,beta_additive)))
+                additive_se=np.sqrt(np.diag(lhm.alpha_cov(X_l,V_l,beta_additive)))
                 additive_out=vector_out(alpha_additive[n_fixed_mean],additive_se[n_fixed_mean],6)
                 # Variance parameters
                 h2_add=additive[0][n_fixed_variance]
