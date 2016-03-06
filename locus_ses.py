@@ -15,7 +15,7 @@ lv='/well/donnelly/ukbiobank_project_8874/ay/linear_variance/'+sample+'/'
 for i in xrange(0,n_loci):
     command='python /well/donnelly/glmm/hlmm/linear_heteroskedastic_mixed_model.py '
     command+=geno_prefix+str(chrs[i])+geno_suffix+' '
-    command+=str(snp_indices[i])+' '+str(snp_indices[i]+2)+' '
+    command+=str(snp_indices[i])+' '+str(snp_indices[i]+1)+' '
     command+=lv+'log_bmi/log_bmi.hdf5 '
     command+=lv+'log_bmi/random_effect_'+str(chrs[i])+'.hdf5 '
     command+=lv+'log_bmi/hits/'+rsids[i]+' '
