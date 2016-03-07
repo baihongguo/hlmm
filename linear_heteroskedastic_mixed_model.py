@@ -566,15 +566,12 @@ def learn_models_chr(args):
     null_h2=null[0][n_fixed_variance]
     null_mle=np.hstack((alpha_null,null[0]))
     print('Calculating Standard Errors')
-    # if args.full_cov:
-    #     null_mle_se=parameter_covariance(null_mle,y,fixed_mean,fixed_variance,G,1e-6)[0]
-    # else:
-    #     null_mle_se=np.zeros((n_fixed_mean+n_fixed_variance))
-    #     null_mle_se[0:n_fixed_mean]=np.sqrt(np.diag(lhm.alpha_cov(fixed_mean,fixed_variance,beta_null)))
-    #     null_mle_se[n_fixed_mean:(n_fixed_mean+n_fixed_variance)]=np.sqrt(np.diag(lhm.beta_cov(fixed_variance)))
-    null_mle_se=np.zeros((n_fixed_mean+n_fixed_variance))
-    null_mle_se[0:n_fixed_mean]=np.sqrt(np.diag(lhm.alpha_cov(fixed_mean,fixed_variance,beta_null)))
-    null_mle_se[n_fixed_mean:(n_fixed_mean+n_fixed_variance)]=np.sqrt(np.diag(lhm.beta_cov(fixed_variance)))
+    if args.full_cov:
+         null_mle_se=parameter_covariance(null_mle,y,fixed_mean,fixed_variance,G,1e-6)[0]
+    else:
+         null_mle_se=np.zeros((n_fixed_mean+n_fixed_variance))
+         null_mle_se[0:n_fixed_mean]=np.sqrt(np.diag(lhm.alpha_cov(fixed_mean,fixed_variance,beta_null)))
+         null_mle_se[n_fixed_mean:(n_fixed_mean+n_fixed_variance)]=np.sqrt(np.diag(lhm.beta_cov(fixed_variance)))
     # Get print out for fixed mean effects
     alpha_out=np.zeros((n_fixed_mean,2))
     alpha_out[:,0]=alpha_null
@@ -672,13 +669,12 @@ def learn_models_chr(args):
                 alpha_additive=alpha_mle_final(additive[0],y_l, X_l, V_l, G_l)
                 beta_additive=additive[0][0:n_fixed_variance]
                 # Estimate standard errors
-                # if args.full_cov:
-                #     additive_pars=np.hstack((alpha_additive,additive[0]))
-                #     additive_par_cov=parameter_covariance(additive_pars,y_l, X_l, V_l, G_l,1e-6)
-                #     additive_se=additive_par_cov[0]
-                # else:
-                #     additive_se=np.sqrt(np.diag(lhm.alpha_cov(X_l,V_l,beta_additive)))
-                additive_se=np.sqrt(np.diag(lhm.alpha_cov(X_l,V_l,beta_additive)))
+                if args.full_cov:
+                     additive_pars=np.hstack((alpha_additive,additive[0]))
+                     additive_par_cov=parameter_covariance(additive_pars,y_l, X_l, V_l, G_l,1e-6)
+                     additive_se=additive_par_cov[0]
+                else:
+                     additive_se=np.sqrt(np.diag(lhm.alpha_cov(X_l,V_l,beta_additive)))
                 additive_out=vector_out(alpha_additive[n_fixed_mean],additive_se[n_fixed_mean],6)
                 # Variance parameters
                 h2_add=additive[0][n_fixed_variance]
