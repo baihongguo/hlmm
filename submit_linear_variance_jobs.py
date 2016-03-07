@@ -61,7 +61,7 @@ for chr in xrange(args.chr,args.chr+1):
         else:
             command+='-q short.qc '
         # Script
-        command+='/well/donnelly/glmm/python/linear_heteroskedastic_mixed_model.py '
+        command+='/well/donnelly/glmm/hlmm/linear_heteroskedastic_mixed_model.py '
         # Genofile
         command+=chr_hdf5+' '
         # Interval
