@@ -76,7 +76,7 @@ for chr in xrange(args.chr,args.chr+1):
             command+='--mean_covar '+args.mean_covar+' '
         if args.variance_covar!=None:
             command+='--variance_covar '+args.variance_covar
-        command+=' --full_cov'
+        #command+=' --full_cov'
         #command+=' --fit_mean_covariates --fit_variance_covariates --full_cov --h2_init 0.7'
         # Check if in list
         if len(args.block_list)>0:
