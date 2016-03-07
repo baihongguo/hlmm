@@ -13,7 +13,7 @@ qline=qfile.readline()
 while len(qline)>0:
     qline=qline.split(' ')
     job_id=qline[0]
-    os.systeme('qdel '+job_id)
+    os.system('qdel '+job_id)
     qline=qfile.readline()
 
 qfile.close()
