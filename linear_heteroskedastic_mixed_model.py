@@ -4,7 +4,7 @@ from scipy.optimize import fmin_l_bfgs_b
 from scipy.stats import chi2
 import h5py, argparse, code, imp
 #import linear_heteroskedastic_model as lhm
-lhm = imp.load_source('lhm', '/well/donnelly/glmm/python/linear_heteroskedastic_model.py')
+lhm = imp.load_source('lhm', '/well/donnelly/glmm/hlmm/linear_heteroskedastic_model.py')
 
 ## Convert 0,1,2 genotypes to het indicator variables
 def dom_convert(g):
