@@ -60,7 +60,7 @@ for chr in xrange(21,23):
         out_file=out_prefix+'out/'+out_suffix
         command='qsub -e '+err_file+' -o '+out_file+' -v OMP_NUM_THREADS=1 -q short.qc '
         # Script
-        command+='/well/donnelly/glmm/python/linear_heteroskedastic_model.py '
+        command+='/well/donnelly/glmm/hlmm/linear_heteroskedastic_model.py '
         # Genofile
         command+=chr_hdf5+' '
         # Interval

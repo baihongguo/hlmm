@@ -24,3 +24,6 @@ for i in xrange(0,n_loci):
     command+='--full_cov'
     print(command)
     os.system(command)
+
+    rsids=c('rs2814992','rs1652376','rs61587156','rs957919','rs6831020',
+       'rs9469488','rs4441044','rs2785980','rs1421085','rs6548238','rs1800437','rs6265','rs7903146')
