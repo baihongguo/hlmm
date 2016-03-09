@@ -30,8 +30,8 @@ if len(args.block_list)>0:
         chr_block_list[(int(block_list[i,0]),int(block_list[i,1]))]=i
 
 
-#for chr in xrange(1,22):
-for chr in xrange(21,23):
+for chr in xrange(1,22):
+#for chr in xrange(21,23):
     # Chromosome string
     chr_string='%02d'%chr
     # Get chromosome length
