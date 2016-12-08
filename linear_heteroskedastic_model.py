@@ -140,7 +140,6 @@ def learn_models_chr(args):
         fixed_mean_names=np.zeros((n_fixed_mean),dtype='S10')
         fixed_mean_names[0]='Intercept'
         fixed_mean_names[1:n_fixed_mean]=args.fixed_mean_names
-        code.interact(local=locals())
     else:
         fixed_mean=np.ones((n,1))
         n_fixed_mean=1
@@ -441,7 +440,6 @@ if __name__ == "__main__":
         mean_ids_dict=id_dict_make(np.array(mean_covar_f['sample_id']))
         fixed_mean_id_match=np.array([mean_ids_dict[x] for x in geno_ids])
         args.fixed_mean=args.fixed_mean[fixed_mean_id_match,:]
-       #code.interact(local=locals())
 
     if not args.variance_covar==None:
         variance_covar_f=h5py.File(args.variance_covar,'r')
