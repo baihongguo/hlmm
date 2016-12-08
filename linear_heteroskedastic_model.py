@@ -440,6 +440,7 @@ if __name__ == "__main__":
         mean_ids_dict=id_dict_make(np.array(mean_covar_f['sample_id']))
         fixed_mean_id_match=np.array([mean_ids_dict[x] for x in geno_ids])
         args.fixed_mean=args.fixed_mean[fixed_mean_id_match,:]
+        code.interact(local=locals())
 
     if not args.variance_covar==None:
         variance_covar_f=h5py.File(args.variance_covar,'r')
