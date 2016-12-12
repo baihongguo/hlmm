@@ -555,7 +555,7 @@ def learn_models_chr(args):
         parbounds.append((None,None))
     parbounds.append((0.00001,None))
     parbounds_av=[(None,None)]+parbounds
-    init_lik=likelihood_and_gradient(init_params,(y, fixed_mean, fixed_variance, G, args.approx_grad))
+    init_lik=likelihood_and_gradient(init_params,y, fixed_mean, fixed_variance, G, args.approx_grad)
     null=fmin_l_bfgs_b(func=likelihood_and_gradient,x0=init_params,
                                 args=(y, fixed_mean, fixed_variance, G, args.approx_grad),
                                 approx_grad=args.approx_grad,
