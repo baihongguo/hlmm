@@ -558,7 +558,7 @@ def learn_models_chr(args):
     null=fmin_l_bfgs_b(func=likelihood_and_gradient,x0=init_params,
                                 args=(y, fixed_mean, fixed_variance, G, args.approx_grad),
                                 approx_grad=args.approx_grad,
-                                bounds=parbounds,factr=1e12)
+                                bounds=parbounds)
     ## Record fitting of null model
     # log-likelihood of null model
     null_ll=-0.5*(null[1]+n*np.log(2*np.pi))
