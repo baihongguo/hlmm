@@ -192,6 +192,11 @@ def name_print(names):
     print_str+=names[n_names-1]+'\tse\tt\t-log10(p-value)\n'
     return print_str
 
+# Only for positive semi-definite matrix
+def inv_from_eig(eig):
+    U_scaled=eig[1]*np.power(eig[0],-0.5)
+    return np.dot(U_scaled,U_scaled.T)
+
 @prof
 def likelihood_and_gradient(pars,*args):
     y, X, V, G, approx_grad = args
@@ -226,7 +231,9 @@ def likelihood_and_gradient(pars,*args):
     G_scaled=np.transpose(G_scaled_T)
     G_cov=np.dot(G_scaled_T,G)
     Lambda=np.identity(l,float)+h2*G_cov
-    Lambda_inv=linalg.inv(Lambda)
+    Lambda=linalg.eigh(Lambda,overwrite_a=True,turbo=True)
+    logdet_Lambda=np.sum(np.log(Lambda[0]))
+    Lambda_inv=inv_from_eig(Lambda)
     ## Calculate MLE of fixed effects
     X_scaled=np.transpose(np.transpose(X)*D_inv)
     alpha=alpha_mle(h2,X_scaled,X,y,G_scaled,G,Lambda_inv)
@@ -243,7 +250,6 @@ def likelihood_and_gradient(pars,*args):
     rnd_resid=np.dot(G_scaled_T,resid)
     Lambda_inv_rnd_resid=np.dot(Lambda_inv,rnd_resid)
     ### Calculate likelihood
-    logdet_Lambda=np.log(linalg.det(Lambda))
     L=np.sum(Vb)+np.sum(resid_square*D_inv)+logdet_Lambda-h2*np.dot(np.transpose(rnd_resid),Lambda_inv_rnd_resid)
     print('Likelihood: '+str(round(-L,4))+'\n')
     ### Calculate gradient
