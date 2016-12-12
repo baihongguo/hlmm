@@ -35,7 +35,7 @@ def safe_likelihood(pars,*args):
     Sigma=D+G_cov
     # Calculate inverse and determinant
     Sigma_inv=linalg.inv(Sigma)
-    Sigma_logdet=linalg.slogdet(Sigma)
+    Sigma_logdet=np.log(linalg.det(Sigma))
     Sigma_logdet=Sigma_logdet[0]*Sigma_logdet[1]
     ## Calculate alpha MLE
     A=np.dot(np.dot(np.transpose(X),Sigma_inv),X)
@@ -244,7 +244,7 @@ def likelihood_and_gradient(pars,*args):
     rnd_resid=np.dot(G_scaled_T,resid)
     Lambda_inv_rnd_resid=np.dot(Lambda_inv,rnd_resid)
     ### Calculate likelihood
-    logdet_Lambda=linalg.slogdet(Lambda)
+    logdet_Lambda=np.log(linalg.det(Lambda))
     logdet_Lambda=logdet_Lambda[0]*logdet_Lambda[1]
     L=np.sum(Vb)+np.sum(resid_square*D_inv)+logdet_Lambda-h2*np.dot(np.transpose(rnd_resid),Lambda_inv_rnd_resid)
     print('Likelihood: '+str(round(-L,4))+'\n')
