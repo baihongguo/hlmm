@@ -2,6 +2,7 @@
 import numpy as np
 from scipy.optimize import fmin_l_bfgs_b
 from scipy.stats import chi2
+from scipy import linalg
 import h5py, argparse, code, imp
 #import linear_heteroskedastic_model as lhm
 lhm = imp.load_source('lhm', '/well/donnelly/glmm/hlmm/linear_heteroskedastic_model.py')
@@ -33,8 +34,8 @@ def safe_likelihood(pars,*args):
     G_cov=h2*G.dot(G.T)
     Sigma=D+G_cov
     # Calculate inverse and determinant
-    Sigma_inv=np.linalg.inv(Sigma)
-    Sigma_logdet=np.linalg.slogdet(Sigma)
+    Sigma_inv=linalg.inv(Sigma)
+    Sigma_logdet=linalg.slogdet(Sigma)
     Sigma_logdet=Sigma_logdet[0]*Sigma_logdet[1]
     ## Calculate alpha MLE
     A=np.dot(np.dot(np.transpose(X),Sigma_inv),X)
@@ -42,7 +43,7 @@ def safe_likelihood(pars,*args):
     if len(X.shape)==1:
         alpha=b/A
     else:
-        alpha=np.linalg.solve(A,b)
+        alpha=linalg.solve(A,b)
     alpha_print=vector_print(alpha)
     #print('Alpha: '+alpha_print)
     ## Calculate likelihood
@@ -66,14 +67,14 @@ def full_grad_beta(pars,*args):
     G_cov=h2*G.dot(G.T)
     Sigma=D+G_cov
     # Calculate inverse and determinant
-    Sigma_inv=np.linalg.inv(Sigma)
+    Sigma_inv=linalg.inv(Sigma)
      ## Calculate alpha MLE
     A=np.dot(np.dot(np.transpose(X),Sigma_inv),X)
     b=np.dot(np.dot(np.transpose(X),Sigma_inv),y)
     if len(X.shape)==1:
         alpha=b/A
     else:
-        alpha=np.linalg.solve(A,b)
+        alpha=linalg.solve(A,b)
     alpha_print=vector_print(alpha)
     #print('Alpha: '+alpha_print)
     ## Calculate likelihood
@@ -107,7 +108,7 @@ def alpha_mle(h2,X_scaled,X,y,Z_scaled,Z,Lambda_inv):
     if len(X.shape)==1:
         alpha=b/A
     else:
-        alpha=np.linalg.solve(A,b)
+        alpha=linalg.solve(A,b)
     return alpha
 
 def grad_h2_inner(Lambda_inv,Z_cov,Lambda_inv_rnd_resid):
@@ -137,7 +138,7 @@ def linear_variance_approx_mle(V,h2,resid,G,Lambda_inv,Lambda_inv_rnd_resid):
     if len(V.shape)==1:
         beta=b/A
     else:
-        beta=np.linalg.solve(A,b)
+        beta=linalg.solve(A,b)
     return beta
 
 def init_beta(D_inv,h2,y,X,V,G):
@@ -147,7 +148,7 @@ def init_beta(D_inv,h2,y,X,V,G):
     G_scaled=np.transpose(G_scaled_T)
     G_cov=np.dot(G_scaled_T,G)
     Lambda=np.identity(l,float)+h2*G_cov
-    Lambda_inv=np.linalg.inv(Lambda)
+    Lambda_inv=linalg.inv(Lambda)
     ## Calculate MLE of fixed effects
     X_scaled=np.transpose(np.transpose(X)*D_inv)
     alpha=alpha_mle(h2,X_scaled,X,y,G_scaled,G,Lambda_inv)
@@ -226,7 +227,7 @@ def likelihood_and_gradient(pars,*args):
     G_scaled=np.transpose(G_scaled_T)
     G_cov=np.dot(G_scaled_T,G)
     Lambda=np.identity(l,float)+h2*G_cov
-    Lambda_inv=np.linalg.inv(Lambda)
+    Lambda_inv=linalg.inv(Lambda)
     ## Calculate MLE of fixed effects
     X_scaled=np.transpose(np.transpose(X)*D_inv)
     alpha=alpha_mle(h2,X_scaled,X,y,G_scaled,G,Lambda_inv)
@@ -243,7 +244,7 @@ def likelihood_and_gradient(pars,*args):
     rnd_resid=np.dot(G_scaled_T,resid)
     Lambda_inv_rnd_resid=np.dot(Lambda_inv,rnd_resid)
     ### Calculate likelihood
-    logdet_Lambda=np.linalg.slogdet(Lambda)
+    logdet_Lambda=linalg.slogdet(Lambda)
     logdet_Lambda=logdet_Lambda[0]*logdet_Lambda[1]
     L=np.sum(Vb)+np.sum(resid_square*D_inv)+logdet_Lambda-h2*np.dot(np.transpose(rnd_resid),Lambda_inv_rnd_resid)
     print('Likelihood: '+str(round(-L,4))+'\n')
@@ -304,7 +305,7 @@ def parameter_covariance(pars,y,X,V,G,dx):
     # Random Effect
     h2=pars[n_fixed_variance+n_fixed_mean]
     Lambda=Lambda_calc(beta,h2,V,G)
-    Lambda_inv=np.linalg.inv(Lambda)
+    Lambda_inv=linalg.inv(Lambda)
     G_cov=G_scaled_T.dot(G)
     # Components of alpha gradient calculation
     X_scaled=np.transpose((X.T)*D_inv)
@@ -333,18 +334,18 @@ def parameter_covariance(pars,y,X,V,G,dx):
         D_inv_lower=np.exp(-V.dot(beta-d))
         G_cov_upper=np.dot((G.T)*D_inv_upper,G)
         G_cov_lower=np.dot((G.T)*D_inv_lower,G)
-        Lambda_inv_upper=np.linalg.inv(np.identity(l,float)+h2*G_cov_upper)
-        Lambda_inv_lower=np.linalg.inv(np.identity(l,float)+h2*G_cov_lower)
+        Lambda_inv_upper=linalg.inv(np.identity(l,float)+h2*G_cov_upper)
+        Lambda_inv_lower=linalg.inv(np.identity(l,float)+h2*G_cov_lower)
         # Change in beta gradient
         H[n_fixed_mean:(n_pars-1),p]=(grad_beta(h2,G,V,D_inv_upper,resid,Lambda_inv_upper)-grad_beta(h2,G,V,D_inv_lower,resid,Lambda_inv_lower))/(2.0*dx)
         # Change in h2 gradient
         H[n_pars-1,p]=(grad_h2(h2,G,V,D_inv_upper,G_cov_upper,resid,Lambda_inv_upper)-grad_h2(h2,G,V,D_inv_lower,G_cov_lower,resid,Lambda_inv_lower))/(2.0*dx)
         H[p,n_pars-1]=H[n_pars-1,p]
     # Calculate h2 components of the Hessian
-    Lambda_inv_upper=np.linalg.inv(np.identity(l,float)+(h2+dx)*G_cov)
-    Lambda_inv_lower=np.linalg.inv(np.identity(l,float)+(h2-dx)*G_cov)
+    Lambda_inv_upper=linalg.inv(np.identity(l,float)+(h2+dx)*G_cov)
+    Lambda_inv_lower=linalg.inv(np.identity(l,float)+(h2-dx)*G_cov)
     H[n_pars-1,n_pars-1]=(grad_h2(h2+dx,G,V,D_inv,G_cov,resid,Lambda_inv_upper)-grad_h2(h2-dx,G,V,D_inv,G_cov,resid,Lambda_inv_lower))/(2.0*dx)
-    par_cov=np.linalg.inv(0.5*H)
+    par_cov=linalg.inv(0.5*H)
     par_se=np.sqrt(np.diag(par_cov))
     #code.interact(local=locals())
     return [par_se,par_cov]
@@ -365,7 +366,7 @@ def parameter_covariance_old(pars,y,X,V,G,dx):
     # Random Effect
     h2=pars[n_fixed_variance+n_fixed_mean]
     Lambda=Lambda_calc(beta,h2,V,G)
-    Lambda_inv=np.linalg.inv(Lambda)
+    Lambda_inv=linalg.inv(Lambda)
     G_cov=G_scaled_T.dot(G)
     # Components of alpha gradient calculation
     X_scaled=np.transpose((X.T)*D_inv)
@@ -392,21 +393,21 @@ def parameter_covariance_old(pars,y,X,V,G,dx):
         # Upper matrices
         D_inv_upper=np.exp(-V.dot(beta+d))
         G_cov_upper=np.dot((G.T)*D_inv_upper,G)
-        Lambda_inv_upper=np.linalg.inv(np.identity(l,float)+h2*G_cov_upper)
+        Lambda_inv_upper=linalg.inv(np.identity(l,float)+h2*G_cov_upper)
         # Lower matrices
         D_inv_lower=np.exp(-V.dot(beta-d))
         G_cov_lower=np.dot((G.T)*D_inv_lower,G)
-        Lambda_inv_lower=np.linalg.inv(np.identity(l,float)+h2*G_cov_lower)
+        Lambda_inv_lower=linalg.inv(np.identity(l,float)+h2*G_cov_lower)
         # Change in beta gradient
         H[n_fixed_mean:(n_pars-1),p]=(grad_beta(h2,G,V,D_inv_upper,resid,Lambda_inv_upper)-grad_beta(h2,G,V,D_inv_lower,resid,Lambda_inv_lower))/(2*dx)
         # Change in h2 gradient
         H[n_pars-1,p]=(grad_h2(h2,G,V,D_inv_upper,G_cov_upper,resid,Lambda_inv_upper)-grad_h2(h2,G,V,D_inv_lower,G_cov_lower,resid,Lambda_inv_lower))/(2*dx)
         H[p,n_pars-1]=H[n_pars-1,p]
     # Calculate h2 components of the Hessian
-    Lambda_inv_upper=np.linalg.inv(np.identity(l,float)+(h2+dx)*G_cov_upper)
-    Lambda_inv_lower=np.linalg.inv(np.identity(l,float)+(h2-dx)*G_cov_upper)
+    Lambda_inv_upper=linalg.inv(np.identity(l,float)+(h2+dx)*G_cov_upper)
+    Lambda_inv_lower=linalg.inv(np.identity(l,float)+(h2-dx)*G_cov_upper)
     H[n_pars-1,n_pars-1]=(grad_h2(h2+dx,G,V,D_inv,G_cov,resid,Lambda_inv_upper)-grad_h2(h2-dx,G,V,D_inv,G_cov,resid,Lambda_inv_lower))/(2*dx)
-    par_cov=np.linalg.inv(0.5*H)
+    par_cov=linalg.inv(0.5*H)
     par_se=np.sqrt(np.diag(par_cov))
     return [par_se,par_cov]
 
@@ -432,7 +433,7 @@ def approx_hessian(pars,y,X,V,G,dx):
 
 def approx_par_cov(pars,y,X,V,G,dx):
     H=0.5*approx_hessian(pars,y,X,V,G,dx)
-    par_cov=np.linalg.inv(H)
+    par_cov=linalg.inv(H)
     par_se=np.sqrt(np.diag(par_cov))
     return [par_se,par_cov]
 
@@ -451,7 +452,7 @@ def alpha_mle_final(pars,*args):
     G_scaled=np.transpose(G.T*D_inv)
     G_cov=np.dot(np.transpose(G),G_scaled)
     Lambda=np.identity(l,float)+h2*G_cov
-    Lambda_inv=np.linalg.inv(Lambda)
+    Lambda_inv=linalg.inv(Lambda)
     ## Calculate MLE of fixed effects
     X_scaled=np.transpose(X.T*D_inv)
     return alpha_mle(h2,X_scaled,X,y,G_scaled,G,Lambda_inv)
