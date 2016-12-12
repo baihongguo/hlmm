@@ -118,6 +118,7 @@ def grad_h2_inner(Lambda_inv,Z_cov,Lambda_inv_rnd_resid):
     dl+=-np.sum(np.square(Lambda_inv_rnd_resid))
     return dl
 
+@prof
 def var_weight(h2,resid,G,Lambda_inv,Lambda_inv_rnd_resid):
     # Compute diagonal elements of nxn covariance matrix
     cov_diagonal=np.einsum('ij,ij->i', np.dot(G, Lambda_inv), G)
