@@ -191,7 +191,7 @@ def name_print(names):
     print_str+=names[n_names-1]+'\tse\tt\t-log10(p-value)\n'
     return print_str
 
-
+@prof
 def likelihood_and_gradient(pars,*args):
     y, X, V, G, approx_grad = args
     l=G.shape[1]
@@ -286,6 +286,7 @@ def Lambda_calc(beta,h2,V,G):
     Lambda=np.identity(G.shape[1],float)+h2*G_scaled_T.dot(G)
     return Lambda
 
+@prof
 def parameter_covariance(pars,y,X,V,G,dx):
     # Pars: alpha, beta, h2
     n_fixed_mean=X.shape[1]
