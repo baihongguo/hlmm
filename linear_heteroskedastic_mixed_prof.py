@@ -122,7 +122,7 @@ def grad_h2_inner(Lambda_inv,Z_cov,Lambda_inv_rnd_resid):
 def var_weight(h2,resid,G,Lambda_inv,Lambda_inv_rnd_resid):
     # Compute diagonal elements of nxn covariance matrix
     #cov_diagonal=np.einsum('ij,ij->i', np.dot(G, Lambda_inv), G)
-    cov_diagonal=(G.dot(Lambda_inv) * G).sum(-1)
+    cov_diagonal=np.sum(np.multiply(G.dot(Lambda_inv),G),axis=0)
     # Compute weights coming from inner product in low rank space
     a=G.dot(Lambda_inv_rnd_resid)
     k=np.square(resid)+h2*cov_diagonal+h2*a*(h2*a-2*resid)
