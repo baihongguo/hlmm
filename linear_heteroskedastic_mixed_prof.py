@@ -246,7 +246,7 @@ def likelihood_and_gradient(pars,*args):
     logdet_Lambda=np.linalg.slogdet(Lambda)
     logdet_Lambda=logdet_Lambda[0]*logdet_Lambda[1]
     L=np.sum(Vb)+np.sum(resid_square*D_inv)+logdet_Lambda-h2*np.dot(np.transpose(rnd_resid),Lambda_inv_rnd_resid)
-    #print('Likelihood: '+str(round(-L,4))+'\t')
+    print('Likelihood: '+str(round(-L,4))+'\n')
     ### Calculate gradient
     if not approx_grad:
         grad=np.zeros((len(pars)))
@@ -555,6 +555,7 @@ def learn_models_chr(args):
         parbounds.append((None,None))
     parbounds.append((0.00001,None))
     parbounds_av=[(None,None)]+parbounds
+    init_lik=likelihood_and_gradient(init_params,(y, fixed_mean, fixed_variance, G, args.approx_grad))
     null=fmin_l_bfgs_b(func=likelihood_and_gradient,x0=init_params,
                                 args=(y, fixed_mean, fixed_variance, G, args.approx_grad),
                                 approx_grad=args.approx_grad,
