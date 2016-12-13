@@ -286,10 +286,6 @@ def grad_h2(G_scaled_T,G_cov,resid,Lambda_inv):
     Lambda_inv_rnd_resid=Lambda_inv.dot(rnd_resid)
     return grad_h2_inner(Lambda_inv,G_cov,Lambda_inv_rnd_resid)
 
-def Lambda_calc(G_scaled_T,h2,V):
-    Lambda=np.identity(G_scaled_T.shape[0],float)+h2*G_scaled_T.dot(G)
-    return Lambda
-
 @prof
 def parameter_covariance(pars,y,X,V,G,dx):
     # Pars: alpha, beta, h2
@@ -304,11 +300,11 @@ def parameter_covariance(pars,y,X,V,G,dx):
     beta=pars[n_fixed_mean:(n_fixed_variance+n_fixed_mean)]
     D_inv=np.exp(-V.dot(beta))
     G_scaled_T=(G.T)*D_inv
+    G_cov=G_scaled_T.dot(G)
     # Random Effect
     h2=pars[n_fixed_variance+n_fixed_mean]
-    Lambda=Lambda_calc(G_scaled_T,h2,V)
+    Lambda=np.identity(l,float)+h2*G_scaled_T.dot(G)
     Lambda_inv=linalg.inv(Lambda,overwrite_a=True,check_finite=False)
-    G_cov=G_scaled_T.dot(G)
     # Components of alpha gradient calculation
     X_scaled=np.transpose((X.T)*D_inv)
     X_grad_alpha=X_scaled-h2*np.dot(np.dot(G_scaled_T.T,Lambda_inv),G_scaled_T.dot(X))
@@ -352,67 +348,6 @@ def parameter_covariance(pars,y,X,V,G,dx):
     par_cov=linalg.inv(0.5*H,overwrite_a=True,check_finite=False)
     par_se=np.sqrt(np.diag(par_cov))
     #code.interact(local=locals())
-    return [par_se,par_cov]
-
-def parameter_covariance_old(pars,y,X,V,G,dx):
-    # Pars: alpha, beta, h2
-    n_fixed_mean=X.shape[1]
-    n_fixed_variance=V.shape[1]
-    n_pars=len(pars)
-    l=G.shape[1]
-    # Calculate intermediate variables
-    alpha=pars[0:n_fixed_mean]
-    resid=(y-X.dot(alpha))
-    # Residual Error
-    beta=pars[n_fixed_mean:(n_fixed_variance+n_fixed_mean)]
-    D_inv=np.exp(-V.dot(beta))
-    G_scaled_T=(G.T)*D_inv
-    # Random Effect
-    h2=pars[n_fixed_variance+n_fixed_mean]
-    Lambda=Lambda_calc(beta,h2,V,G)
-    Lambda_inv=linalg.inv(Lambda)
-    G_cov=G_scaled_T.dot(G)
-    # Components of alpha gradient calculation
-    X_scaled=np.transpose((X.T)*D_inv)
-    X_grad_alpha=X_scaled-h2*np.dot(np.dot(G_scaled_T.T,Lambda_inv),G_scaled_T.dot(X))
-    H=np.zeros((n_pars,n_pars))
-    # Calculate alpha components of hessian
-    for p in xrange(0,n_fixed_mean):
-        # Calculate change in alpha gradient
-        d=np.zeros((n_fixed_mean))
-        d[p]=dx
-        resid_upper=(y-X.dot(alpha+d))
-        resid_lower=(y-X.dot(alpha-d))
-        H[0:n_fixed_mean,p]=(grad_alpha(resid_upper,X_grad_alpha)-grad_alpha(resid_lower,X_grad_alpha))/(2*dx)
-        # Calculate change in beta gradient
-        H[n_fixed_mean:(n_pars-1),p]=(grad_beta(h2,G,V,D_inv,resid_upper,Lambda_inv)-grad_beta(h2,G,V,D_inv,resid_lower,Lambda_inv))/(2*dx)
-        H[p,n_fixed_mean:(n_pars-1)]=H[n_fixed_mean:(n_fixed_mean+n_fixed_variance),p]
-        # Calculate change in h2 gradient
-        H[n_pars-1,p]=(grad_h2(h2,G,V,D_inv,G_cov,resid_upper,Lambda_inv)-grad_h2(h2,G,V,D_inv,G_cov,resid_lower,Lambda_inv))/(2*dx)
-        H[p,n_pars-1]=H[n_pars-1,p]
-    # Calculate beta components of Hessian
-    for p in xrange(n_fixed_mean,n_pars-1):
-        d=np.zeros((n_fixed_variance))
-        d[p-n_fixed_mean]=dx
-        # Upper matrices
-        D_inv_upper=np.exp(-V.dot(beta+d))
-        G_cov_upper=np.dot((G.T)*D_inv_upper,G)
-        Lambda_inv_upper=linalg.inv(np.identity(l,float)+h2*G_cov_upper)
-        # Lower matrices
-        D_inv_lower=np.exp(-V.dot(beta-d))
-        G_cov_lower=np.dot((G.T)*D_inv_lower,G)
-        Lambda_inv_lower=linalg.inv(np.identity(l,float)+h2*G_cov_lower)
-        # Change in beta gradient
-        H[n_fixed_mean:(n_pars-1),p]=(grad_beta(h2,G,V,D_inv_upper,resid,Lambda_inv_upper)-grad_beta(h2,G,V,D_inv_lower,resid,Lambda_inv_lower))/(2*dx)
-        # Change in h2 gradient
-        H[n_pars-1,p]=(grad_h2(h2,G,V,D_inv_upper,G_cov_upper,resid,Lambda_inv_upper)-grad_h2(h2,G,V,D_inv_lower,G_cov_lower,resid,Lambda_inv_lower))/(2*dx)
-        H[p,n_pars-1]=H[n_pars-1,p]
-    # Calculate h2 components of the Hessian
-    Lambda_inv_upper=linalg.inv(np.identity(l,float)+(h2+dx)*G_cov_upper)
-    Lambda_inv_lower=linalg.inv(np.identity(l,float)+(h2-dx)*G_cov_upper)
-    H[n_pars-1,n_pars-1]=(grad_h2(h2+dx,G,V,D_inv,G_cov,resid,Lambda_inv_upper)-grad_h2(h2-dx,G,V,D_inv,G_cov,resid,Lambda_inv_lower))/(2*dx)
-    par_cov=linalg.inv(0.5*H)
-    par_se=np.sqrt(np.diag(par_cov))
     return [par_se,par_cov]
 
 
