@@ -281,14 +281,13 @@ def grad_beta(h2,G_scaled_T,V,D_inv,resid,Lambda_inv):
     n1t=np.ones((n)).reshape((1,n))
     return np.dot(n1t,np.transpose(np.transpose(V)*(1-k*D_inv)))
 
-def grad_h2(h2,G,V,D_inv,G_cov,resid,Lambda_inv):
-    G_scaled_T=(G.T)*D_inv
+def grad_h2(G_scaled_T,G_cov,resid,Lambda_inv):
     rnd_resid=G_scaled_T.dot(resid)
     Lambda_inv_rnd_resid=Lambda_inv.dot(rnd_resid)
     return grad_h2_inner(Lambda_inv,G_cov,Lambda_inv_rnd_resid)
 
 def Lambda_calc(G_scaled_T,h2,V):
-    Lambda=np.identity(G.shape[1],float)+h2*G_scaled_T.dot(G)
+    Lambda=np.identity(G_scaled_T.shape[0],float)+h2*G_scaled_T.dot(G)
     return Lambda
 
 @prof
@@ -326,7 +325,7 @@ def parameter_covariance(pars,y,X,V,G,dx):
         H[n_fixed_mean:(n_pars-1),p]=(grad_beta(h2,G_scaled_T,V,D_inv,resid_upper,Lambda_inv)-grad_beta(h2,G_scaled_T,V,D_inv,resid_lower,Lambda_inv))/(2.0*dx)
         H[p,n_fixed_mean:(n_pars-1)]=H[n_fixed_mean:(n_fixed_mean+n_fixed_variance),p]
         # Calculate change in h2 gradient
-        H[n_pars-1,p]=(grad_h2(h2,G,V,D_inv,G_cov,resid_upper,Lambda_inv)-grad_h2(h2,G,V,D_inv,G_cov,resid_lower,Lambda_inv))/(2.0*dx)
+        H[n_pars-1,p]=(grad_h2(G_scaled_T,G_cov,resid_upper,Lambda_inv)-grad_h2(G_scaled_T,G_cov,resid_lower,Lambda_inv))/(2.0*dx)
         H[p,n_pars-1]=H[n_pars-1,p]
     # Calculate beta components of Hessian
     for p in xrange(n_fixed_mean,n_pars-1):
@@ -344,12 +343,12 @@ def parameter_covariance(pars,y,X,V,G,dx):
         # Change in beta gradient
         H[n_fixed_mean:(n_pars-1),p]=(grad_beta(h2,G_scaled_T_upper,V,D_inv_upper,resid,Lambda_inv_upper)-grad_beta(h2,G_scaled_T_lower,V,D_inv_lower,resid,Lambda_inv_lower))/(2.0*dx)
         # Change in h2 gradient
-        H[n_pars-1,p]=(grad_h2(h2,G,V,D_inv_upper,G_cov_upper,resid,Lambda_inv_upper)-grad_h2(h2,G,V,D_inv_lower,G_cov_lower,resid,Lambda_inv_lower))/(2.0*dx)
+        H[n_pars-1,p]=(grad_h2(G_scaled_T_upper,G_cov_upper,resid,Lambda_inv_upper)-grad_h2(G_scaled_T_lower,G_cov_lower,resid,Lambda_inv_lower))/(2.0*dx)
         H[p,n_pars-1]=H[n_pars-1,p]
     # Calculate h2 components of the Hessian
     Lambda_inv_upper=linalg.inv(np.identity(l,float)+(h2+dx)*G_cov,overwrite_a=True,check_finite=False)
     Lambda_inv_lower=linalg.inv(np.identity(l,float)+(h2-dx)*G_cov,overwrite_a=True,check_finite=False)
-    H[n_pars-1,n_pars-1]=(grad_h2(h2+dx,G,V,D_inv,G_cov,resid,Lambda_inv_upper)-grad_h2(h2-dx,G,V,D_inv,G_cov,resid,Lambda_inv_lower))/(2.0*dx)
+    H[n_pars-1,n_pars-1]=(grad_h2(G_scaled_T,G_cov,resid,Lambda_inv_upper)-grad_h2(G_scaled_T,G_cov,resid,Lambda_inv_lower))/(2.0*dx)
     par_cov=linalg.inv(0.5*H,overwrite_a=True,check_finite=False)
     par_se=np.sqrt(np.diag(par_cov))
     #code.interact(local=locals())
