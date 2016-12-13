@@ -270,7 +270,7 @@ def grad_alpha(resid,X_grad_alpha):
     return -2*np.dot(resid.T,X_grad_alpha)
 
 @profile
-def grad_beta(h2,G_scaled_T,V,D_inv,resid,Lambda_inv):
+def grad_beta(h2,G,G_scaled_T,V,D_inv,resid,Lambda_inv):
     n=V.shape[0]
     # Low rank covariance
     rnd_resid=np.dot(G_scaled_T,resid)
@@ -318,7 +318,7 @@ def parameter_covariance(pars,y,X,V,G,dx):
         resid_lower=(y-X.dot(alpha-d))
         H[0:n_fixed_mean,p]=(grad_alpha(resid_upper,X_grad_alpha)-grad_alpha(resid_lower,X_grad_alpha))/(2.0*dx)
         # Calculate change in beta gradient
-        H[n_fixed_mean:(n_pars-1),p]=(grad_beta(h2,G_scaled_T,V,D_inv,resid_upper,Lambda_inv)-grad_beta(h2,G_scaled_T,V,D_inv,resid_lower,Lambda_inv))/(2.0*dx)
+        H[n_fixed_mean:(n_pars-1),p]=(grad_beta(h2,G,G_scaled_T,V,D_inv,resid_upper,Lambda_inv)-grad_beta(h2,G,G_scaled_T,V,D_inv,resid_lower,Lambda_inv))/(2.0*dx)
         H[p,n_fixed_mean:(n_pars-1)]=H[n_fixed_mean:(n_fixed_mean+n_fixed_variance),p]
         # Calculate change in h2 gradient
         H[n_pars-1,p]=(grad_h2(G_scaled_T,G_cov,resid_upper,Lambda_inv)-grad_h2(G_scaled_T,G_cov,resid_lower,Lambda_inv))/(2.0*dx)
@@ -337,7 +337,7 @@ def parameter_covariance(pars,y,X,V,G,dx):
         Lambda_inv_upper=linalg.inv(np.identity(l,float)+h2*G_cov_upper,overwrite_a=True,check_finite=False)
         Lambda_inv_lower=linalg.inv(np.identity(l,float)+h2*G_cov_lower,overwrite_a=True,check_finite=False)
         # Change in beta gradient
-        H[n_fixed_mean:(n_pars-1),p]=(grad_beta(h2,G_scaled_T_upper,V,D_inv_upper,resid,Lambda_inv_upper)-grad_beta(h2,G_scaled_T_lower,V,D_inv_lower,resid,Lambda_inv_lower))/(2.0*dx)
+        H[n_fixed_mean:(n_pars-1),p]=(grad_beta(h2,G,G_scaled_T_upper,V,D_inv_upper,resid,Lambda_inv_upper)-grad_beta(h2,G,G_scaled_T_lower,V,D_inv_lower,resid,Lambda_inv_lower))/(2.0*dx)
         # Change in h2 gradient
         H[n_pars-1,p]=(grad_h2(G_scaled_T_upper,G_cov_upper,resid,Lambda_inv_upper)-grad_h2(G_scaled_T_lower,G_cov_lower,resid,Lambda_inv_lower))/(2.0*dx)
         H[p,n_pars-1]=H[n_pars-1,p]
