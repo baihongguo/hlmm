@@ -269,6 +269,7 @@ def likelihood_and_gradient(pars,*args):
 def grad_alpha(resid,X_grad_alpha):
     return -2*np.dot(resid.T,X_grad_alpha)
 
+@profile
 def grad_beta(h2,G,V,D_inv,resid,Lambda_inv):
     n=V.shape[0]
     # Low rank covariance
@@ -310,7 +311,7 @@ def parameter_covariance(pars,y,X,V,G,dx):
     # Random Effect
     h2=pars[n_fixed_variance+n_fixed_mean]
     Lambda=Lambda_calc(beta,h2,V,G)
-    Lambda_inv=linalg.inv(Lambda)
+    Lambda_inv=linalg.inv(Lambda,overwrite_a=True,check_finite=False)
     G_cov=G_scaled_T.dot(G)
     # Components of alpha gradient calculation
     X_scaled=np.transpose((X.T)*D_inv)
@@ -339,18 +340,18 @@ def parameter_covariance(pars,y,X,V,G,dx):
         D_inv_lower=np.exp(-V.dot(beta-d))
         G_cov_upper=np.dot((G.T)*D_inv_upper,G)
         G_cov_lower=np.dot((G.T)*D_inv_lower,G)
-        Lambda_inv_upper=linalg.inv(np.identity(l,float)+h2*G_cov_upper)
-        Lambda_inv_lower=linalg.inv(np.identity(l,float)+h2*G_cov_lower)
+        Lambda_inv_upper=linalg.inv(np.identity(l,float)+h2*G_cov_upper,overwrite_a=True,check_finite=False)
+        Lambda_inv_lower=linalg.inv(np.identity(l,float)+h2*G_cov_lower,overwrite_a=True,check_finite=False)
         # Change in beta gradient
         H[n_fixed_mean:(n_pars-1),p]=(grad_beta(h2,G,V,D_inv_upper,resid,Lambda_inv_upper)-grad_beta(h2,G,V,D_inv_lower,resid,Lambda_inv_lower))/(2.0*dx)
         # Change in h2 gradient
         H[n_pars-1,p]=(grad_h2(h2,G,V,D_inv_upper,G_cov_upper,resid,Lambda_inv_upper)-grad_h2(h2,G,V,D_inv_lower,G_cov_lower,resid,Lambda_inv_lower))/(2.0*dx)
         H[p,n_pars-1]=H[n_pars-1,p]
     # Calculate h2 components of the Hessian
-    Lambda_inv_upper=linalg.inv(np.identity(l,float)+(h2+dx)*G_cov)
-    Lambda_inv_lower=linalg.inv(np.identity(l,float)+(h2-dx)*G_cov)
+    Lambda_inv_upper=linalg.inv(np.identity(l,float)+(h2+dx)*G_cov,overwrite_a=True,check_finite=False)
+    Lambda_inv_lower=linalg.inv(np.identity(l,float)+(h2-dx)*G_cov,overwrite_a=True,check_finite=False)
     H[n_pars-1,n_pars-1]=(grad_h2(h2+dx,G,V,D_inv,G_cov,resid,Lambda_inv_upper)-grad_h2(h2-dx,G,V,D_inv,G_cov,resid,Lambda_inv_lower))/(2.0*dx)
-    par_cov=linalg.inv(0.5*H)
+    par_cov=linalg.inv(0.5*H,overwrite_a=True,check_finite=False)
     par_se=np.sqrt(np.diag(par_cov))
     #code.interact(local=locals())
     return [par_se,par_cov]
@@ -442,6 +443,7 @@ def approx_par_cov(pars,y,X,V,G,dx):
     par_se=np.sqrt(np.diag(par_cov))
     return [par_se,par_cov]
 
+@profile
 def alpha_mle_final(pars,*args):
     y, X, V, G = args
     n_fixed_variance=V.shape[1]
@@ -561,7 +563,6 @@ def learn_models_chr(args):
         parbounds.append((None,None))
     parbounds.append((0.00001,None))
     parbounds_av=[(None,None)]+parbounds
-    init_lik=likelihood_and_gradient(init_params,y, fixed_mean, fixed_variance, G, args.approx_grad)
     null=fmin_l_bfgs_b(func=likelihood_and_gradient,x0=init_params,
                                 args=(y, fixed_mean, fixed_variance, G, args.approx_grad),
                                 approx_grad=args.approx_grad,
