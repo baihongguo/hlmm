@@ -8,7 +8,7 @@ def likelihood(y,X,V,beta,alpha):
     Vbeta=V.dot(beta)
     resid=y-X.dot(alpha)
     L=np.sum(Vbeta)+np.sum(np.square(resid)*np.exp(-Vbeta))
-    print('Likelihood: '+str(round(L,5)))
+    #print('Likelihood: '+str(round(L,5)))
     return L
 
 def alpha_mle(y,X,V,beta):
