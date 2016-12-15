@@ -11,7 +11,7 @@ parser.add_argument('--variance_covar',type=str,help='Locaiton of .hdf5 file wit
                     default=None)
 parser.add_argument('--block_list',type=str,help='Location of file with chr,block to do inference on',default='')
 parser.add_argument('--block_size',type=int,help='size of block of SNPs to test at once',
-                    default=1000)
+                    default=250)
 parser.add_argument('--long',action='store_true',default=False)
 args=parser.parse_args()
 
