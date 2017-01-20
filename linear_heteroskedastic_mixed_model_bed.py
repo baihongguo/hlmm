@@ -720,8 +720,8 @@ if __name__ == "__main__":
     gts_with_obs=list()
     if np.sum(random_gts_NAs)>0:
         print('Imputing missing genotypes in random effect matrix')
-        for i in xrange(0,args.selected_genotypes.dim[1]):
-            if random_gts_NAs[i]<args.selected_genotypes.dim[0]:
+        for i in xrange(0,args.selected_genotypes.shape[1]):
+            if random_gts_NAs[i]<args.selected_genotypes.shape[0]:
                 gts_with_obs.append(i)
             elif random_gts_NAs[i]>0:
                 gt_mean=np.mean(args.selected_genotypes[np.logical_not(random_gts_NAs),i])
