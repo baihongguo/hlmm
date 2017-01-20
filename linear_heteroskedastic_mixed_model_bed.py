@@ -685,6 +685,7 @@ if __name__ == "__main__":
     parser.add_argument('--min_maf',type=float,help='Minimum minor allele frequency (default 0.05)',default=0.05)
     parser.add_argument('--max_missing',type=float,help='Maximum percent of missing genotype calls (default 5)',default=5)
     parser.add_argument('--missing_char',type=str,help='Missing value string in phenotype file (default NA)',default='NA')
+    parser.add_argument('--approx_grad',action='store_false',default=False)
 
     args=parser.parse_args()
 
