@@ -729,6 +729,8 @@ if __name__ == "__main__":
         # Keep only columns with observations
         args.selected_genotypes=args.selected_genotypes[:,gts_with_obs]
 
+    code.interact(local=locals())
+
     # Match with geno IDs
     random_ids_dict=id_dict_make(np.array(random_gts_f.iid))
     random_ids_match=np.array([random_ids_dict[tuple(x)] for x in geno_ids])
