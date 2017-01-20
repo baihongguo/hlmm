@@ -404,13 +404,7 @@ def learn_models_chr(args):
     else:
         chr_length=genotypes.shape[1]
     n=genotypes.shape[0]
-    # Read in random effect
-    if isinstance(args.selected_genotypes, basestring):
-        Gfile=h5py.File(args.selected_genotypes,'r')
-        G=np.array(Gfile['selected_genotypes'])
-        Gfile.close()
-    else:
-        G = args.selected_genotypes
+    G = args.selected_genotypes
     if np.min(G)>0:
         raise(ValueError('Missing values in random effect genotypes'))
     l=float(G.shape[1])
@@ -494,7 +488,7 @@ def learn_models_chr(args):
         parbounds.append((None,None))
     parbounds.append((0.00001,None))
     parbounds_av=[(None,None)]+parbounds
-    code.interact(local=locals())
+    #code.interact(local=locals())
     null=fmin_l_bfgs_b(func=likelihood_and_gradient,x0=init_params,
                                 args=(y, fixed_mean, fixed_variance, G, args.approx_grad),
                                 approx_grad=args.approx_grad,
