@@ -716,7 +716,7 @@ if __name__ == "__main__":
     args.selected_genotypes=random_gts_f.val
     # Check for NAs
     random_isnan=np.isnan(args.selected_genotypes)
-    random_gts_NAs=np.sum(random_isnan,axis=1)
+    random_gts_NAs=np.sum(random_isnan,axis=0)
     gts_with_obs=list()
     if np.sum(random_gts_NAs)>0:
         print('Imputing missing genotypes in random effect matrix')
