@@ -714,6 +714,21 @@ if __name__ == "__main__":
     # Get random effect loci
     random_gts_f=Bed(args.random_gts).read()
     args.selected_genotypes=random_gts_f.val
+    # Check for NAs
+    random_isnan=np.isnan(args.selected_genotypes)
+    random_gts_NAs=np.sum(random_isnan,axis=1)
+    gts_with_obs=list()
+    if np.sum(random_gts_NAs)>0:
+        print('Imputing missing genotypes in random effect matrix')
+        for i in xrange(0,args.selected_genotypes.dim[1]):
+            if random_gts_NAs[i]<args.selected_genotypes.dim[0]:
+                gts_with_obs.append(i)
+            elif random_gts_NAs[i]>0:
+                gt_mean=np.mean(args.selected_genotypes[np.logical_not(random_gts_NAs),i])
+                args.selected_genotypes[random_gts_NAs,i]=gt_mean
+        # Keep only columns with observations
+        args.selected_genotypes=args.selected_genotypes[:,gts_with_obs]
+
     # Match with geno IDs
     random_ids_dict=id_dict_make(np.array(random_gts_f.iid))
     random_ids_match=np.array([random_ids_dict[tuple(x)] for x in geno_ids])
