@@ -723,13 +723,11 @@ if __name__ == "__main__":
         for i in xrange(0,args.selected_genotypes.shape[1]):
             if random_gts_NAs[i]<args.selected_genotypes.shape[0]:
                 gts_with_obs.append(i)
-            elif random_gts_NAs[i]>0:
-                gt_mean=np.mean(args.selected_genotypes[np.logical_not(random_isnan[:,i]),i])
-                args.selected_genotypes[random_isnan[:,i],i]=gt_mean
+                if random_gts_NAs[i]>0:
+                    gt_mean=np.mean(args.selected_genotypes[np.logical_not(random_isnan[:,i]),i])
+                    args.selected_genotypes[random_isnan[:,i],i]=gt_mean
         # Keep only columns with observations
         args.selected_genotypes=args.selected_genotypes[:,gts_with_obs]
-
-    code.interact(local=locals())
 
     # Match with geno IDs
     random_ids_dict=id_dict_make(np.array(random_gts_f.iid))
