@@ -682,6 +682,8 @@ if __name__ == "__main__":
     parser.add_argument('--missing_char',type=str,help='Missing value string in phenotype file (default NA)',default='NA')
     parser.add_argument('--approx_grad',action='store_false',default=False)
     parser.add_argument('--full_cov',action='store_true',default=True)
+    parser.add_argument('--fit_mean_covariates',action='store_true',default=False)
+    parser.add_argument('--fit_variance_covariates',action='store_true',default=False)
 
     args=parser.parse_args()
 
