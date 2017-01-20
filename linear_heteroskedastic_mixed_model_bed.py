@@ -674,17 +674,17 @@ if __name__ == "__main__":
     parser.add_argument('phenofile',type=str,help='Location of the phenotype file in PLINK format')
     parser.add_argument('random_gts',type=str,help='Location of the BED file with the genotypes of the random effect')
     parser.add_argument('outprefix',type=str,help='Location to output csv file with association statistics')
-    parser.add_argument('--mean_covar',type=str,help='Location of mean covariate file in PLINK format',
+    parser.add_argument('--mean_covar',type=str,help='Location of mean covariate file in PLINK format (default None)',
                         default=None)
-    parser.add_argument('--var_covar',type=str,help='Locaiton of variance covariate file in PLINK format',
+    parser.add_argument('--var_covar',type=str,help='Locaiton of variance covariate file in PLINK format (default None)',
                         default=None)
     parser.add_argument('--h2_init',type=float,help='Initial value for variance explained by random effects (default 0.05)',
                         default=0.05)
     parser.add_argument('--phen_index',type=int,help='If phenotype file contains multiple phenotypes, which row to choose (default 0)',
                         default=0)
-    parser.add_argument('--min_maf',type=float,help='Minimum minor allele frequency',default=0.05)
-    parser.add_argument('--max_missing',type=float,help='Maximum percent of missing genotype calls',default=5)
-    parser.add_argument('--missing_char',type=str,help='Missing value string in phenotype file',default='NA')
+    parser.add_argument('--min_maf',type=float,help='Minimum minor allele frequency (default 0.05)',default=0.05)
+    parser.add_argument('--max_missing',type=float,help='Maximum percent of missing genotype calls (default 5)',default=5)
+    parser.add_argument('--missing_char',type=str,help='Missing value string in phenotype file (default NA)',default='NA')
 
     args=parser.parse_args()
 
@@ -702,7 +702,7 @@ if __name__ == "__main__":
         pheno_noNA=args.phenotype[np.logical_not(np.isnan(args.phenotype))]
         args.phenotype=args.phenotype/pheno_noNA.std()
     elif args.phenotype.ndim==2:
-        args.phenotype=args.phenotype[args.phen_index,:]
+        args.phenotype=args.phenotype[:,args.phen_index]
         pheno_noNA=args.phenotype[np.logical_not(np.isnan(args.phenotype))]
         args.phenotype=args.phenotype/pheno_noNA.std()
     else:
