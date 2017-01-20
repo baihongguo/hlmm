@@ -692,7 +692,7 @@ if __name__ == "__main__":
     # select subset to test
     test_chr=test_chr[:,args.start:args.end].read()
     args.genotypes=test_chr.val
-    print('Number of test loci: '+str(args.test_gts.shape[1]))
+    print('Number of test loci: '+str(args.genotypes.shape[1]))
     # Get sample ids
     geno_ids=test_chr.iid
     # Get phenotype file
