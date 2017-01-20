@@ -724,8 +724,8 @@ if __name__ == "__main__":
             if random_gts_NAs[i]<args.selected_genotypes.shape[0]:
                 gts_with_obs.append(i)
             elif random_gts_NAs[i]>0:
-                gt_mean=np.mean(args.selected_genotypes[np.logical_not(random_gts_NAs),i])
-                args.selected_genotypes[random_gts_NAs,i]=gt_mean
+                gt_mean=np.mean(args.selected_genotypes[np.logical_not(random_isnan[:,i]),i])
+                args.selected_genotypes[random_isnan[:,i],i]=gt_mean
         # Keep only columns with observations
         args.selected_genotypes=args.selected_genotypes[:,gts_with_obs]
 
