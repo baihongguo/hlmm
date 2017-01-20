@@ -726,7 +726,7 @@ if __name__ == "__main__":
     if not args.mean_covar==None:
         mean_covar_f=Pheno(args.mean_covar,iid_if_none=geno_ids,missing=args.missing_char).read()
         args.fixed_mean=mean_covar_f.val
-        args.fixed_mean_names=np.array(mean_covar_f.iid,dtype='S20')
+        args.fixed_mean_names=np.array(mean_covar_f._col,dtype='S20')
         # Match with geno_ids
         mean_ids_dict=id_dict_make(np.array(mean_covar_f.iid))
         fixed_mean_id_match=np.array([mean_ids_dict[tuple(x)] for x in geno_ids])
@@ -735,7 +735,7 @@ if __name__ == "__main__":
     if not args.var_covar==None:
         var_covar_f=Pheno(args.var_covar,iid_if_none=geno_ids,missing=args.missing_char).read()
         args.fixed_variance=var_covar_f.val
-        args.fixed_variance_names=np.array(var_covar_f.iid,dtype='S20')
+        args.fixed_variance_names=np.array(var_covar_f._col,dtype='S20')
         # Match with geno_ids
         var_ids_dict=id_dict_make(np.array(var_covar_f.iid))
         fixed_variance_id_match=np.array([var_ids_dict[tuple(x)] for x in geno_ids])
