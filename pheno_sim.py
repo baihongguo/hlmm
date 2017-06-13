@@ -244,9 +244,9 @@ else:
     equal_effects=True
 for i in xrange(0,nphen):
     if nd>0:
-        phenotypes[:,i]=phenosim(add_gts,dom_gts,interaction_gts,h2,hd,h2_epi,equal_effects)
+        phenotypes[:,i]=phenosim(add_gts,dom_gts,interaction_gts,h2,hd,h2_epi,equal_effects,args.variance_effect)
     else:
-        phenotypes[:,i]=phenosim(add_gts,np.array(()),interaction_gts,h2,hd,h2_epi,equal_effects)
+        phenotypes[:,i]=phenosim(add_gts,np.array(()),interaction_gts,h2,hd,h2_epi,equal_effects,args.variance_effect)
 
 # Save causal genotypes (including dominance and epistasis)
 if args.save_causal_gts:
