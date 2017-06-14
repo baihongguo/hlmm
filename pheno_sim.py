@@ -100,7 +100,7 @@ def phenosim(add_gts,dom_gts,interaction_gts,h2,hd,h2_epi,equal_effects,var_effe
     else:
         V=np.ones((nc))
     E_var=(1-h2-h2_epi-hd)*V
-    E=np.array([np.random.normal(scale=E_var[x]) for x in xrange(0,nc)])
+    E=np.array([np.random.normal(scale=E_var[x]) for x in xrange(0,N)])
 
     # Combine to form phenotype
     Y=A+D+Epi+E
