@@ -6,11 +6,9 @@ from numpy import random as rand
 import argparse, h5py, math, code
 
 def id_dict_make(ids):
-    if not type(ids)==np.ndarray:
-        raise(ValueError('Unsupported ID type: should be numpy nd.array'))
     id_dict={}
     for id_index in xrange(0,len(ids)):
-        id_dict[tuple(ids[id_index,:])]=id_index
+        id_dict[ids[id_index]]=id_index
     return id_dict
 
 parser=argparse.ArgumentParser(description='Simulate Phenotypes with Particular Parameters.h')
@@ -157,7 +155,7 @@ for i in xrange(0,nchr):
         sample_id_dict=id_dict_make(sample_id)
     else:
         sample_i=np.array(geno_file['sample_id'])
-        sample_i_match = np.array([sample_id_dict[tuple(x)] for x in sample_i])
+        sample_i_match = np.array([sample_id_dict[x] for x in sample_i])
         genotypes=genotypes[sample_i_match,:]
     # Number of causal variants from this chromosome
     if i==nchr-1:
