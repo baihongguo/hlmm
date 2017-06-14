@@ -5,6 +5,14 @@ import numpy as np
 from numpy import random as rand
 import argparse, h5py, math, code
 
+def id_dict_make(ids):
+    if not type(ids)==np.ndarray:
+        raise(ValueError('Unsupported ID type: should be numpy nd.array'))
+    id_dict={}
+    for id_index in xrange(0,len(ids)):
+        id_dict[tuple(ids[id_index,:])]=id_index
+    return id_dict
+
 parser=argparse.ArgumentParser(description='Simulate Phenotypes with Particular Parameters.h')
 
 parser.add_argument('genofiles',type=str,help='Text file with location of genotypes for chr i on line i')
@@ -143,6 +151,14 @@ for i in xrange(0,nchr):
     genofile=gfiles.readline().split('\n')[0]
     genofile=h5py.File(genofile,'r')
     genotypes=np.array(genofile['genotypes']).T
+    # Get sample IDs
+    if i==0:
+        sample_id=np.array(genofile['sample_id'])
+        sample_id_dict=id_dict_make(sample_id)
+    else:
+        sample_i=np.array(geno_file['sample_id'])
+        sample_i_match = np.array([sample_id_dict[tuple(x)] for x in sample_i])
+        genotypes=genotypes[sample_i_match,:]
     # Number of causal variants from this chromosome
     if i==nchr-1:
 	nc_chr=nc-n_selected
@@ -256,4 +272,5 @@ if args.save_causal_gts:
 	phenofile.create_dataset('causal_gts',data=causal_gts)
 	phenofile.create_dataset('interaction_gts',data=interaction_gts)
 	phenofile.create_dataset('dom_gts',data=dom_gts)
+    phenofile.create_dataset('sample_id',sample_id)
 phenofile.close()
