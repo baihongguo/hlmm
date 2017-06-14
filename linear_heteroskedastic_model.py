@@ -429,7 +429,7 @@ if __name__ == "__main__":
     pheno_ids=np.array(phenofile['sample_id'])
     pheno_id_dict=id_dict_make(pheno_ids)
     pheno_id_match=np.array([pheno_id_dict[x] for x in geno_ids])
-    args.phenotype=args.phenotype[pheno_id_match]
+    args.phenotype=args.phenotype[pheno_id_match,args.phen_index]
 
     ## Get covariates
     if not args.mean_covar==None:
