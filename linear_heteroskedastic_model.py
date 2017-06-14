@@ -392,7 +392,7 @@ if __name__ == "__main__":
     parser.add_argument('--phen_index',type=int,help='If phenotype file contains multiple phenotypes, which row to choose (default 0)',
                         default=0)
     parser.add_argument('--min_maf',type=float,help='Minimum minor allele frequency',default=0.05)
-    parser.add_argument('--max_missing',type=float,help='Maximum percent of missing genotype calls',default=5)
+    parser.add_argument('--max_missing',type=float,help='Maximum percent of missing genotype calls',default=1)
     parser.add_argument('--fit_mean_covariates',action='store_true',default=False)
     parser.add_argument('--fit_variance_covariates',action='store_true',default=False)
     parser.add_argument('--dom',action='store_true',default=False)
