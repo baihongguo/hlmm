@@ -415,12 +415,11 @@ if __name__ == "__main__":
 
     phenofile=h5py.File(args.phenofile,'r')
     args.phenotype=np.array(phenofile['phenotypes'])
-    print(args.phenotype.shape)
     if args.phenotype.ndim==1:
         pheno_noNA=args.phenotype[np.logical_not(np.isnan(args.phenotype))]
         args.phenotype=args.phenotype/pheno_noNA.std()
     elif args.phenotype.ndim==2:
-        args.phenotype=args.phenotype[args.phen_index,:]
+        args.phenotype=args.phenotype[:,args.phen_index]
         pheno_noNA=args.phenotype[np.logical_not(np.isnan(args.phenotype))]
         args.phenotype=args.phenotype/pheno_noNA.std()
     else:
