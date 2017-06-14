@@ -164,7 +164,10 @@ for i in xrange(0,nchr):
 	nc_chr=int(math.floor(float(chr_lengths[i])/float(genome_length)*nc))
     if nc_chr>0:
     	# Skip this many columns between causal variants
-    	colskip=int(chr_lengths[i]/nc_chr)-1
+        if chr_lengths[i]==nc_chr:
+            colskip=1
+        else:
+            colskip=int(chr_lengths[i]/nc_chr)-1
     	# Record indices of causal variants within chromosome
     	causal_chr=np.array(range(0,chr_lengths[i],colskip),dtype=int)
     	causal_chr=causal_chr[0:nc_chr]
