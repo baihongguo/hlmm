@@ -253,6 +253,7 @@ for i in xrange(0,nc):
         pair_count+=1
 
 phenofile.create_dataset('interactions',data=interacting_snp_indices)
+phenofile.create_dataset('sample_id',data=sample_id)
 
 # Simulate phenotypes and save to sim group of screen hdf5 file
 phenotypes=phenofile.create_dataset('phenotypes',(N,nphen),dtype=float)
@@ -272,5 +273,4 @@ if args.save_causal_gts:
 	phenofile.create_dataset('causal_gts',data=causal_gts)
 	phenofile.create_dataset('interaction_gts',data=interaction_gts)
 	phenofile.create_dataset('dom_gts',data=dom_gts)
-    phenofile.create_dataset('sample_id',sample_id)
 phenofile.close()
