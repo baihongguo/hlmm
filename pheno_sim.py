@@ -84,13 +84,16 @@ def phenosim(add_gts,dom_gts,interaction_gts,h2,hd,h2_epi,equal_effects,var_effe
         D=0
 
     # Sample interaction effects
-    n_interact=interaction_gts.shape[1]
-    if equal_effects:
-        epi_effects=equal_effect_sim(n_interact)
+    if h2_epi>0:
+        n_interact=interaction_gts.shape[1]
+        if equal_effects:
+            epi_effects=equal_effect_sim(n_interact)
+        else:
+            epi_effects=rand.randn((n_interact))
+        Epi=np.dot(interaction_gts,epi_effects)
+        Epi=np.sqrt(h2_epi)*Epi/Epi.std()
     else:
-        epi_effects=rand.randn((n_interact))
-    Epi=np.dot(interaction_gts,epi_effects)
-    Epi=np.sqrt(h2_epi)*Epi/Epi.std()
+        Epi=0
 
     # Simulate residual error
     E=rand.randn((N))
