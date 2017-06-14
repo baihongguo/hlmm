@@ -107,7 +107,7 @@ def phenosim(add_gts,dom_gts,interaction_gts,h2,hd,h2_epi,equal_effects,var_effe
         var_effects = var_effect*equal_effect_sim(nc)
         V = np.exp(np.dot(add_gts, var_effects))
     else:
-        V=np.ones((nc))
+        V=np.ones((n))
     E_var=(1-h2-h2_epi-hd)*V
     E=np.array([np.random.normal(scale=E_var[x]) for x in xrange(0,N)])
 
