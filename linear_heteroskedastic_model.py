@@ -415,6 +415,7 @@ if __name__ == "__main__":
 
     phenofile=h5py.File(args.phenofile,'r')
     args.phenotype=np.array(phenofile['phenotypes'])
+    print(args.phenotype.shape)
     if args.phenotype.ndim==1:
         pheno_noNA=args.phenotype[np.logical_not(np.isnan(args.phenotype))]
         args.phenotype=args.phenotype/pheno_noNA.std()
@@ -429,7 +430,7 @@ if __name__ == "__main__":
     pheno_ids=np.array(phenofile['sample_id'])
     pheno_id_dict=id_dict_make(pheno_ids)
     pheno_id_match=np.array([pheno_id_dict[x] for x in geno_ids])
-    args.phenotype=args.phenotype[pheno_id_match,args.phen_index]
+    args.phenotype=args.phenotype[pheno_id_match]
 
     ## Get covariates
     if not args.mean_covar==None:
