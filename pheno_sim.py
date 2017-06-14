@@ -175,7 +175,7 @@ for i in xrange(0,nchr):
         for l in xrange(0,nc_chr):
             loc_index=causal_chr[l]
             g=genotypes[:,loc_index]
-            print(loc_index)
+            #print(loc_index)
             missing=100*float(np.sum(g<0))/float(genotypes.shape[0])
             freq=freq=np.mean(g[g>0])/2.0
             # Mean imputation
