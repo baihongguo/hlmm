@@ -35,10 +35,10 @@ geno_ids=np.array(test_chr['sample_id'])
 args.append=True
 
 phenofile=h5py.File(args.phenofile,'r')
-phenotypes=np.array(phenofile['phenotypes'])
+phenotypes=np.array(phenofile['phenotypes']).T
 
 print(phenotypes.shape)
 
-for p in xrange(0,args.phenotype.shape):
+for p in xrange(0,phenotypes.shape):
     args.phenotype=phenotypes[:,p]
     learn_models_chr(args)
