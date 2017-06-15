@@ -29,7 +29,9 @@ args=parser.parse_args()
 test_chr=h5py.File(args.genofile,'r')
 test_gts=test_chr['genotypes']
 # select subset to test
-args.genotypes=np.transpose(np.array(test_gts[0,:]))
+args.genotypes=np.transpose(np.array(test_gts))
+args.start=0
+args.end=1
 # Get sample ids
 geno_ids=np.array(test_chr['sample_id'])
 args.append=True
