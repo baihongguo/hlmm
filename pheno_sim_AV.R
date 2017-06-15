@@ -1,4 +1,4 @@
-#!/bin/Rscript
+#!/apps/well/R/3.1.3/bin/Rscript
 args=commandArgs(trailingOnly=T)
 
 v=args[1]
