@@ -1,3 +1,4 @@
+#!/apps/well/python/2.7.8/bin/python
 import h5py, argparse, imp
 import numpy as np
 lhm = imp.load_source('lhm', '/well/donnelly/glmm/hlmm/linear_heteroskedastic_model.py')
