@@ -62,7 +62,7 @@ def equal_effect_sim(nvar):
     return 2*rand.binomial(1,0.5,size=nvar)-1
 
 
-def phenosim(add_gts,dom_gts,interaction_gts,h2,hd,h2_epi,equal_effects,var_effect):
+def phenosim(add_gts,dom_gts,interaction_gts=None,h2=0,hd=0,h2_epi=0,equal_effects=True,var_effect=0):
     nc=add_gts.shape[1]
     N=add_gts.shape[0]
     # Generate additive effects
@@ -232,28 +232,33 @@ else:
 ## Interactions
 npairs=nc*(nc-1)/2
 # Array for interaction genotypes
-interaction_gts=np.zeros((N,n_interact))
+if n_interact>0:
+    interaction_gts=np.zeros((N,n_interact))
+    # Sample pairs to have interactions
+    interact_indices=rand.choice(npairs,size=n_interact,replace=False)
+    # Record which SNPs interact
+    interacting_snp_indices=np.zeros((n_interact,4),dtype=int)
 
-# Sample pairs to have interactions
-interact_indices=rand.choice(npairs,size=n_interact,replace=False)
-# Record which SNPs interact
-interacting_snp_indices=np.zeros((n_interact,4),dtype=int)
+    # Fill in interaction genotypes
+    pair_count=0
+    interact_count=0
+    for i in xrange(0,nc):
+        for j in xrange(0,i):
+            if pair_count in interact_indices:
+                # Record which SNPs interact
+                interacting_snp_indices[interact_count,0:2]=causal_loci[i,:]
+                interacting_snp_indices[interact_count,2:4]=causal_loci[j,:]
+            # Form interaction genotypes
+                interaction_gts[:,interact_count]=add_gts[:,i]*add_gts[:,j]
+                interact_count+=1
+            pair_count+=1
 
-# Fill in interaction genotypes
-pair_count=0
-interact_count=0
-for i in xrange(0,nc):
-    for j in xrange(0,i):
-        if pair_count in interact_indices:
-            # Record which SNPs interact
-            interacting_snp_indices[interact_count,0:2]=causal_loci[i,:]
-            interacting_snp_indices[interact_count,2:4]=causal_loci[j,:]
-	    # Form interaction genotypes
-            interaction_gts[:,interact_count]=add_gts[:,i]*add_gts[:,j]
-            interact_count+=1
-        pair_count+=1
+    phenofile.create_dataset('interactions',data=interacting_snp_indices)
+else:
+    interaction_gts=None
 
-phenofile.create_dataset('interactions',data=interacting_snp_indices)
+
+
 phenofile.create_dataset('sample_id',data=sample_id)
 
 # Simulate phenotypes and save to sim group of screen hdf5 file
@@ -272,6 +277,8 @@ for i in xrange(0,nphen):
 # Save causal genotypes (including dominance and epistasis)
 if args.save_causal_gts:
 	phenofile.create_dataset('causal_gts',data=causal_gts)
-	phenofile.create_dataset('interaction_gts',data=interaction_gts)
 	phenofile.create_dataset('dom_gts',data=dom_gts)
+
+if n_interact > 0 and args.save_causal_gts:
+    phenofile.create_dataset('interaction_gts', data=interaction_gts)
 phenofile.close()
