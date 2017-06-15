@@ -6,6 +6,21 @@ parser=argparse.ArgumentParser()
 parser.add_argument('genofile',type=str,help='Location of the .hdf5 file with genotypes as dataset')
 parser.add_argument('phenofile',type=str,help='Location of the .hdf5 file with phenotypes as dataset')
 parser.add_argument('outprefix',type=str,help='Location to output csv file with test statistics')
+parser.add_argument('--mean_covar', type=str, help='Location of .hdf5 file with matrix of fixed mean effect variables',
+                    default=None)
+parser.add_argument('--variance_covar', type=str, help='Locaiton of .hdf5 file with matrix of fixed variance effects',
+                    default=None)
+parser.add_argument('--phen_index', type=int,
+                    help='If phenotype file contains multiple phenotypes, which row to choose (default 0)',
+                    default=0)
+parser.add_argument('--min_maf', type=float, help='Minimum minor allele frequency', default=0.05)
+parser.add_argument('--max_missing', type=float, help='Maximum percent of missing genotype calls', default=1)
+parser.add_argument('--fit_mean_covariates', action='store_true', default=False)
+parser.add_argument('--fit_variance_covariates', action='store_true', default=False)
+parser.add_argument('--dom', action='store_true', default=False)
+parser.add_argument('--gvar', action='store_true', default=False)
+parser.add_argument('--min_obs', type=int,
+                    help='Minimum number of observations of each genotype to fit dominance/general models', default=100)
 
 args=parser.parse_args()
 
@@ -16,15 +31,13 @@ test_gts=test_chr['genotypes']
 args.genotypes=np.transpose(np.array(test_gts[0,:]))
 # Get sample ids
 geno_ids=np.array(test_chr['sample_id'])
-
+args.append=True
 
 phenofile=h5py.File(args.phenofile,'r')
-args.phenotype=np.array(phenofile['phenotypes'])
+phenotypes=np.array(phenofile['phenotypes'])
 
-# Match IDs with geno IDs
-pheno_ids=np.array(phenofile['sample_id'])
-pheno_id_dict=id_dict_make(pheno_ids)
-pheno_id_match=np.array([pheno_id_dict[x] for x in geno_ids])
-args.phenotype=args.phenotype[pheno_id_match]
+print(phenotypes.shape)
 
-learn_models_chr(args)
+for p in xrange(0,args.phenotype.shape):
+    args.phenotype=phenotypes[:,p]
+    learn_models_chr(args)

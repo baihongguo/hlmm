@@ -166,18 +166,23 @@ def learn_models_chr(args):
     # Rescale
     ######### Initialise output files #######
     ## Output file
-    outfile=open(args.outprefix+'.models.gz','wb')
-    header='SNP_index\tfrequency\tmean_llr\tmean_effect\tmean_effect_se\tvar_llr\tmean_effect_av\tmean_effect_av_se\tvar_effect\tvar_effect_se'
-    if args.dom or args.gvar:
-        if args.dom:
-            header+='\tdom_llr\tmean_effect_adv\tmean_effect_adv_se\tvar_effect_adv\tvar_effect_adv_se\tdom_effect\tdom_effect_se'
-        if args.gvar:
-            header+='\tgvar_llr\tmean_effect_advg\tmean_effect_advg_se\tvar_effect_advg\tvar_effect_advg_se\tdom_effect_advg\tdom_effect_advg_se\tgvar_effect\tgvar_effect_se\n'
+    if args.append:
+        write_mode='ab'
+    else:
+        write_mode='wb'
+    outfile=open(args.outprefix+'.models.gz',write_mode)
+    if not args.append:
+        header='SNP_index\tfrequency\tmean_llr\tmean_effect\tmean_effect_se\tvar_llr\tmean_effect_av\tmean_effect_av_se\tvar_effect\tvar_effect_se'
+        if args.dom or args.gvar:
+            if args.dom:
+                header+='\tdom_llr\tmean_effect_adv\tmean_effect_adv_se\tvar_effect_adv\tvar_effect_adv_se\tdom_effect\tdom_effect_se'
+            if args.gvar:
+                header+='\tgvar_llr\tmean_effect_advg\tmean_effect_advg_se\tvar_effect_advg\tvar_effect_advg_se\tdom_effect_advg\tdom_effect_advg_se\tgvar_effect\tgvar_effect_se\n'
+            else:
+                header+='\n'
         else:
             header+='\n'
-    else:
-        header+='\n'
-    outfile.write(header)
+        outfile.write(header)
     ######### Fit Null Model ##########
     ## Get initial guesses for null model
     print('Fitting Null Model')
@@ -197,16 +202,18 @@ def learn_models_chr(args):
     alpha_out=np.zeros((n_fixed_mean,2))
     alpha_out[:,0]=alpha_null
     alpha_out[:,1]=null_mle_se[0:n_fixed_mean]
-    np.savetxt(args.outprefix+'.null_mean_effects.txt',
-                              np.hstack((fixed_mean_names.reshape((n_fixed_mean,1)),alpha_out)),
-                              delimiter='\t',fmt='%s')
+    if not args.append:
+        np.savetxt(args.outprefix+'.null_mean_effects.txt',
+                                  np.hstack((fixed_mean_names.reshape((n_fixed_mean,1)),alpha_out)),
+                                  delimiter='\t',fmt='%s')
     # variance effects
     beta_out=np.zeros((n_fixed_variance,2))
     beta_out[0:n_fixed_variance,0]=beta_null
     beta_out[0:n_fixed_variance,1]=null_mle_se[n_fixed_mean:(n_fixed_mean+n_fixed_variance)]
-    np.savetxt(args.outprefix+'.null_variance_effects.txt',
-                              np.hstack((fixed_variance_names.reshape((n_fixed_variance,1)),beta_out)),
-                              delimiter='\t',fmt='%s')
+    if not args.append:
+        np.savetxt(args.outprefix+'.null_variance_effects.txt',
+                                  np.hstack((fixed_variance_names.reshape((n_fixed_variance,1)),beta_out)),
+                                  delimiter='\t',fmt='%s')
     if not args.fit_mean_covariates:
         # Residual phenotype
         y=y-fixed_mean.dot(alpha_null)
@@ -398,6 +405,7 @@ if __name__ == "__main__":
     parser.add_argument('--dom',action='store_true',default=False)
     parser.add_argument('--gvar',action='store_true',default=False)
     parser.add_argument('--min_obs',type=int,help='Minimum number of observations of each genotype to fit dominance/general models',default=100)
+    parser.add_argument('--append',action='store_true',default=False,help='Append results to existing output file')
 
     args=parser.parse_args()
 
