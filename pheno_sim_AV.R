@@ -10,9 +10,9 @@ g=h5read('/well/donnelly/ukbiobank_project_8874/ay/linear_variance/new_simulatio
 
 g=g[,1]
 
-add_effect=sqrt(2*h2)
+add_effect=sqrt(2*as.numeric(h2))
 
-y=replicate(1000,sapply(g,function(x) rnorm(1,add_effect*x,exp(v*x))))
+y=replicate(1000,sapply(g,function(x) rnorm(1,add_effect*x,exp(as.numeric(v)*x))))
 
 h5createFile(paste('/well/donnelly/ukbiobank_project_8874/ay/linear_variance/new_simulations/av_vs_a/h2_',h2,'_v_',v,'hdf5',sep=''))
 h5write(y,paste('/well/donnelly/ukbiobank_project_8874/ay/linear_variance/new_simulations/av_vs_a/h2_',h2,'_v_',v,'hdf5',sep=''),'phenotypes')
