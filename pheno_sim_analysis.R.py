@@ -31,7 +31,7 @@ test_gts=test_chr['genotypes']
 # select subset to test
 args.genotypes=np.transpose(np.array(test_gts))
 args.start=0
-args.end=1
+args.end=0
 # Get sample ids
 geno_ids=np.array(test_chr['sample_id'])
 args.append=True
