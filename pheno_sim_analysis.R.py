@@ -42,5 +42,9 @@ phenotypes=np.array(phenofile['phenotypes']).T
 print(phenotypes.shape)
 
 for p in xrange(0,phenotypes.shape[1]):
+    if p==0:
+        args.append=False
+    else:
+        args.append=True
     args.phenotype=phenotypes[:,p]
     lhm.learn_models_chr(args)
