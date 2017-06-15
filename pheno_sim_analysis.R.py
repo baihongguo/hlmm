@@ -41,4 +41,4 @@ print(phenotypes.shape)
 
 for p in xrange(0,phenotypes.shape[1]):
     args.phenotype=phenotypes[:,p]
-    learn_models_chr(args)
+    lhm.learn_models_chr(args)
