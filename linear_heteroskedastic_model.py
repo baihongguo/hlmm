@@ -109,6 +109,7 @@ def learn_models_chr(args):
     genotypes=args.genotypes
     if genotypes.ndim==1:
         chr_length=1
+        genotypes=genotypes.reshape(genotypes.shape[0],1)
     else:
         chr_length=genotypes.shape[1]
     n=genotypes.shape[0]
