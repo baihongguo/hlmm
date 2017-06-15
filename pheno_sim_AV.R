@@ -1,3 +1,4 @@
+#!/bin/Rscript
 args=commandArgs(trailingOnly=T)
 
 v=args[1]
