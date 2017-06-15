@@ -1,5 +1,5 @@
 lhm = imp.load_source('lhm', '/well/donnelly/glmm/hlmm/linear_heteroskedastic_model.py')
-import h5py, argparse
+import h5py, argparse, imp
 import numpy as np
 
 parser=argparse.ArgumentParser()
