@@ -37,7 +37,7 @@ dom_effect=sqrt(as.numeric(h2_d))/(f*(1-f))
 
 
 
-y=replicate(10,sapply(1:10^5,function(x) rnorm(1,add_effect*g[x]+dom_effect*dom_gts[x],exp(as.numeric(v)*g[x]+as.numeric(gvar)*dom_gts[x]))))
+y=replicate(1000,sapply(1:10^5,function(x) rnorm(1,add_effect*g[x]+dom_effect*dom_gts[x],exp(as.numeric(v)*g[x]+as.numeric(gvar)*dom_gts[x]))))
 
 outfile=paste(outprefix,'/h2_',h2,'_v_',v,'_h2d_',h2_d,'_gvar_',gvar,'.hdf5',sep='')
 h5createFile(outfile)
