@@ -474,7 +474,7 @@ def learn_models_chr(args):
     ## Output file
     outfile=open(args.outprefix+'.models.gz','wb')
     outfile.write('SNP_index\tfrequency\tmean_llr\tmean_effect\tmean_effect_se\tmean_effect_t\tmean_effect_pval\t'
-                  'var_llr\t''mean_effect_av\tmean_effect_av_se\tmean_effect_av_t\tmean_effect_av_pval\t'
+                  'var_llr\t''mean_effect_av\tmean_effect_av_se\tmean_effecxt_av_t\tmean_effect_av_pval\t'
                   'var_effect\tvar_effect_se\tvar_effect_t\tvar_effect_pval\n')
     ######### Fit Null Model ##########
     ## Get initial guesses for null model

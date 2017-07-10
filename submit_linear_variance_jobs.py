@@ -11,7 +11,7 @@ parser.add_argument('--variance_covar',type=str,help='Locaiton of .hdf5 file wit
                     default=None)
 parser.add_argument('--block_list',type=str,help='Location of file with chr,block to do inference on',default='')
 parser.add_argument('--block_size',type=int,help='size of block of SNPs to test at once',
-                    default=250)
+                    default=1500)
 parser.add_argument('--long',action='store_true',default=False)
 args=parser.parse_args()
 
@@ -76,7 +76,7 @@ for chr in xrange(args.chr,args.chr+1):
             command+='--mean_covar '+args.mean_covar+' '
         if args.variance_covar!=None:
             command+='--variance_covar '+args.variance_covar
-        #command+=' --full_cov'
+        command+=' --full_cov'
         #command+=' --fit_mean_covariates --fit_variance_covariates --full_cov --h2_init 0.7'
         # Check if in list
         if len(args.block_list)>0:
