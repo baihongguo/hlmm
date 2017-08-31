@@ -5,7 +5,8 @@ from scipy.stats import chi2
 from scipy import linalg
 import h5py, argparse, code, imp
 #import linear_heteroskedastic_model as lhm
-lhm = imp.load_source('lhm', '/well/donnelly/glmm/hlmm/linear_heteroskedastic_model.py')
+lhm = imp.load_source('lhm', '/Users/ay/Dropbox/hlmm/linear_heteroskedastic_model.py')
+#lhm = imp.load_source('lhm', '/well/donnelly/glmm/hlmm/linear_heteroskedastic_model.py')
 
 ## Convert 0,1,2 genotypes to het indicator variables
 def dom_convert(g):
@@ -516,19 +517,19 @@ def learn_models_chr(args):
     alpha_out[:,0]=alpha_null
     alpha_out[:,1]=null_mle_se[0:n_fixed_mean]
     np.savetxt(args.outprefix+'.null_mean_effects.txt',
-                              np.hstack((fixed_mean_names.reshape((n_fixed_mean,1)),alpha_out)),
+                              np.hstack((fixed_mean_names.reshape((n_fixed_mean,1)),np.array(alpha_out,dtype='S20'))),
                               delimiter='\t',fmt='%s')
     # variance effects
     beta_out=np.zeros((n_fixed_variance,2))
     beta_out[0:n_fixed_variance,0]=beta_null
     beta_out[0:n_fixed_variance,1]=null_mle_se[n_fixed_mean:(n_fixed_mean+n_fixed_variance)]
     np.savetxt(args.outprefix+'.null_variance_effects.txt',
-                              np.hstack((fixed_variance_names.reshape((n_fixed_variance,1)),beta_out)),
+                              np.hstack((fixed_variance_names.reshape((n_fixed_variance,1)),np.array(beta_out,dtype='S20'))),
                               delimiter='\t',fmt='%s')
     # variance parameter
     if args.full_cov:
         np.savetxt(args.outprefix+'.null_h2.txt',
-                   np.array([null_ll,null_h2,null_mle_se[n_fixed_variance]]),
+                   np.array([null_ll,null_h2,null_mle_se[n_fixed_variance]],dtype='S20'),
                    delimiter='\t',fmt='%s')
     else:
         np.savetxt(args.outprefix+'.null_h2.txt',
@@ -726,7 +727,6 @@ if __name__ == "__main__":
     random_ids_match=np.array([random_ids_dict[x] for x in geno_ids])
     args.selected_genotypes=args.selected_genotypes[random_ids_match,:]
 
-    #
     ## Get covariates
     if not args.mean_covar==None:
         mean_covar_f=h5py.File(args.mean_covar,'r')

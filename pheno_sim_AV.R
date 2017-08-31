@@ -23,7 +23,7 @@ dom_gt_make=function(g,f){
 
 library(rhdf5)
 
-g=h5read('/well/donnelly/ukbiobank_project_8874/ay/linear_variance/new_simulations/artificial_gt_0.5.hdf5','genotypes')
+g=h5read('artificial_gt_0.5.hdf5','genotypes')
 
 g=g[,1]
 
@@ -31,13 +31,13 @@ add_effect=sqrt(2*as.numeric(h2))
 
 f=mean(g)/2
 
-dom_gts=sapply(g,dom_gt_make,f)
+dom_gts=(g-1)^2
 
 dom_effect=sqrt(as.numeric(h2_d))/(f*(1-f))
 
 
 
-y=replicate(1000,sapply(1:10^5,function(x) rnorm(1,add_effect*g[x]+dom_effect*dom_gts[x],exp(as.numeric(v)*g[x]+as.numeric(gvar)*dom_gts[x]))))
+y=t(sapply(1:10^5,function(x) rnorm(1000,add_effect*g[x]+dom_effect*dom_gts[x],exp(as.numeric(v)*g[x]+as.numeric(gvar)*dom_gts[x]))))
 
 outfile=paste(outprefix,'/h2_',h2,'_v_',v,'_h2d_',h2_d,'_gvar_',gvar,'.hdf5',sep='')
 h5createFile(outfile)

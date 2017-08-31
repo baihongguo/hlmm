@@ -7,7 +7,7 @@ import argparse, imp
 from pysnptools.snpreader import Bed, SnpReader, Pheno
 import code
 #import linear_heteroskedastic_model as lhm
-lhm = imp.load_source('lhm', '/well/donnelly/glmm/hlmm/linear_heteroskedastic_model.py')
+lhm = imp.load_source('lhm', '/well/donelly/glmm/hlmm/linear_heteroskedastic_model.py')
 
 ## Convert 0,1,2 genotypes to het indicator variables
 def dom_convert(g):
@@ -413,7 +413,6 @@ def learn_models_chr(args):
     y=args.phenotype
     if len(y.shape)==2:
         y=y[:,0]
-    n=float(n)
     y_not_nan=np.logical_not(np.isnan(y))
     # Remove phenotype NAs
     if np.sum(y_not_nan)<n:
@@ -469,8 +468,7 @@ def learn_models_chr(args):
     ######### Initialise output files #######
     ## Output file
     outfile=open(args.outprefix+'.models.gz','wb')
-    outfile.write('SNP_index\tfrequency\tmean_llr\tmean_effect\tmean_effect_se\tmean_effect_t\tmean_effect_pval\t'
-                  'var_llr\t''mean_effect_av\tmean_effect_av_se\tmean_effect_av_t\tmean_effect_av_pval\t'
+    outfile.write('SNP_index\tfrequency\tlikelihood\tmean_effect\tmean_effect_se\tmean_effect_t\tmean_effect_pval\t'
                   'var_effect\tvar_effect_se\tvar_effect_t\tvar_effect_pval\n')
     ######### Fit Null Model ##########
     ## Get initial guesses for null model
@@ -501,35 +499,25 @@ def learn_models_chr(args):
     null_h2=null[0][n_fixed_variance]
     null_mle=np.hstack((alpha_null,null[0]))
     print('Calculating Standard Errors')
-    if args.full_cov:
-         null_mle_se=parameter_covariance(null_mle,y,fixed_mean,fixed_variance,G,1e-6)[0]
-    else:
-         null_mle_se=np.zeros((n_fixed_mean+n_fixed_variance))
-         null_mle_se[0:n_fixed_mean]=np.sqrt(np.diag(lhm.alpha_cov(fixed_mean,fixed_variance,beta_null)))
-         null_mle_se[n_fixed_mean:(n_fixed_mean+n_fixed_variance)]=np.sqrt(np.diag(lhm.beta_cov(fixed_variance)))
+    null_mle_se=parameter_covariance(null_mle,y,fixed_mean,fixed_variance,G,1e-6)[0]
     # Get print out for fixed mean effects
     alpha_out=np.zeros((n_fixed_mean,2))
     alpha_out[:,0]=alpha_null
     alpha_out[:,1]=null_mle_se[0:n_fixed_mean]
     np.savetxt(args.outprefix+'.null_mean_effects.txt',
-                              np.hstack((fixed_mean_names.reshape((n_fixed_mean,1)),alpha_out)),
+                              np.hstack((fixed_mean_names.reshape((n_fixed_mean,1)),np.array(alpha_out,dtype='S20'))),
                               delimiter='\t',fmt='%s')
     # variance effects
     beta_out=np.zeros((n_fixed_variance,2))
     beta_out[0:n_fixed_variance,0]=beta_null
     beta_out[0:n_fixed_variance,1]=null_mle_se[n_fixed_mean:(n_fixed_mean+n_fixed_variance)]
     np.savetxt(args.outprefix+'.null_variance_effects.txt',
-                              np.hstack((fixed_variance_names.reshape((n_fixed_variance,1)),beta_out)),
+                              np.hstack((fixed_variance_names.reshape((n_fixed_variance,1)),np.array(beta_out,dtype='S20'))),
                               delimiter='\t',fmt='%s')
     # variance parameter
-    if args.full_cov:
-        np.savetxt(args.outprefix+'.null_h2.txt',
-                   np.array([null_ll,null_h2,null_mle_se[n_fixed_variance]]),
-                   delimiter='\t',fmt='%s')
-    else:
-        np.savetxt(args.outprefix+'.null_h2.txt',
-                   np.array([null_ll,null_h2,np.nan]),
-                   delimiter='\t',fmt='%s')
+    np.savetxt(args.outprefix+'.null_h2.txt',
+               np.array([null_ll,null_h2,null_mle_se[n_fixed_variance]],dtype='S20'),
+               delimiter='\t',fmt='%s')
     # variance of random effect
     # If not fitting covariates for each locus, reformulate as residuals of null model
     if not args.fit_mean_covariates:
@@ -556,8 +544,6 @@ def learn_models_chr(args):
     ## Loop through loci
     for loc in xrange(0,chr_length):
         print(loc)
-        likelihoods=np.array(['NaN','NaN','NaN'],dtype=float)
-        llrs=np.array(['NaN','NaN'],dtype=float)
         allele_frq=np.nan
         # Filler for output if locus doesn't pass threshold
         additive_out='NaN\tNaN\tNaN\tNaN'
@@ -570,6 +556,7 @@ def learn_models_chr(args):
         if n_missing<n:
             missingness=100.0*(n_missing/n)
             test_gts=test_gts[test_gt_not_na]
+            test_gts=test_gts.reshape((test_gts.shape[0],1))
             allele_frq=np.mean(test_gts)/2
             if allele_frq>0.5:
                 allele_frq=1-allele_frq
@@ -578,77 +565,33 @@ def learn_models_chr(args):
                 y_l=y[test_gt_not_na]
                 n_l=len(y_l)
                 X_l=fixed_mean[test_gt_not_na,:]
-                V_l=fixed_variance[test_gt_not_na,:]
-                G_l=G[test_gt_not_na,:]
-                ## Fit Null model ##
-                print('Fitting locus null model')
-                init_params=np.zeros((n_fixed_variance+1))
-                init_params[0:n_fixed_variance]=lhm.optimize_model(y_l,X_l,V_l)['beta']
-                init_params[n_fixed_variance]=null_h2
-                null_l=fmin_l_bfgs_b(func=likelihood_and_gradient,x0=init_params,
-                                args=(y_l, X_l, V_l, G_l, args.approx_grad),
-                                bounds=parbounds)
-                likelihoods[0]=-0.5*(null_l[1]+n_l*np.log(2*np.pi))
-                h2_null=null_l[0][n_fixed_variance]
-                ## Fit linear mean model ##
-                print('Fitting locus linear model')
-                test_gts=np.array(test_gts).reshape((n_l,1))
                 X_l=np.hstack((X_l,test_gts))
-                # Calculate initial parameters
-                init_params[0:n_fixed_variance]=lhm.optimize_model(y_l,X_l,V_l)['beta']
-                init_params[n_fixed_variance]=h2_null
-                additive=fmin_l_bfgs_b(func=likelihood_and_gradient,x0=init_params,
-                                args=(y_l, X_l, V_l, G_l, args.approx_grad),
-                                bounds=parbounds)
-                likelihoods[1]=-0.5*(additive[1]+n_l*np.log(2*np.pi))
-                alpha_additive=alpha_mle_final(additive[0],y_l, X_l, V_l, G_l)
-                beta_additive=additive[0][0:n_fixed_variance]
-                # Estimate standard errors
-                if args.full_cov:
-                     additive_pars=np.hstack((alpha_additive,additive[0]))
-                     additive_par_cov=parameter_covariance(additive_pars,y_l, X_l, V_l, G_l,1e-6)
-                     additive_se=additive_par_cov[0]
-                else:
-                     additive_se=np.sqrt(np.diag(lhm.alpha_cov(X_l,V_l,beta_additive)))
-                additive_out=vector_out(alpha_additive[n_fixed_mean],additive_se[n_fixed_mean],6)
-                # Variance parameters
-                h2_add=additive[0][n_fixed_variance]
-                ## Fit linear mean and variance model ##
-                print('Fitting locus linear mean and log-variance model')
+                V_l=fixed_variance[test_gt_not_na,:]
                 V_l=np.hstack((V_l,test_gts))
+                G_l=G[test_gt_not_na,:]
+                ## Fit additive-variance model
                 init_params=np.zeros((n_fixed_variance+2))
                 init_params[0:(n_fixed_variance+1)]=lhm.optimize_model(y_l,X_l,V_l)['beta']
-                init_params[n_fixed_variance+1]=h2_add
-                # Add to parbounds
+                init_params[n_fixed_variance+1]=null_h2
+                print('Fitting locus additive-variance model')
                 av=fmin_l_bfgs_b(func=likelihood_and_gradient,x0=init_params,
                                 args=(y_l, X_l, V_l, G_l, args.approx_grad),
                                 bounds=parbounds_av)
                 # Likelihood
-                likelihoods[2]=-0.5*(av[1]+n_l*np.log(2*np.pi))
+                likelihood=-0.5*(av[1]+n_l*np.log(2*np.pi))
                 # Mean effect of locus
                 alpha_av=alpha_mle_final(av[0],y_l, X_l, V_l, G_l)
                 # Approximate standard errors
                 av_se=np.zeros((2))
-                if args.full_cov:
-                    av_mle=np.hstack((alpha_av,av[0]))
-                    av_par_cov=parameter_covariance(av_mle,y_l, X_l, V_l, G_l,1e-6)
-                    av_se[0]=av_par_cov[0][n_fixed_mean]
-                    av_se[1]=av_par_cov[0][n_fixed_mean+n_fixed_variance+1]
-                else:
-                    alpha_av_se=np.sqrt(np.diag(lhm.alpha_cov(X_l,V_l,av[0][0:(n_fixed_variance+1)])))
-                    av_se[0]=alpha_av_se[n_fixed_mean]
-                    beta_av_se=np.sqrt(np.diag(lhm.beta_cov(V_l)))
-                    av_se[1]=beta_av_se[n_fixed_variance]
+                av_mle=np.hstack((alpha_av,av[0]))
+                av_par_cov=parameter_covariance(av_mle,y_l, X_l, V_l, G_l,1e-6)
+                av_se[0]=av_par_cov[0][n_fixed_mean]
+                av_se[1]=av_par_cov[0][n_fixed_mean+n_fixed_variance+1]
                 additive_av_out=vector_out(alpha_av[n_fixed_mean],av_se[0],6)
                 # Variance effect of locus
                 variance_out=vector_out(av[0][n_fixed_variance],av_se[1])
-                ## Write output ##
-                # Chi-square statistics
-                llrs[0]=2*(likelihoods[1]-likelihoods[0])
-                llrs[1]=2*(likelihoods[2]-likelihoods[1])
             # General association
-        outfile.write(str(args.start+loc) + '\t' + str(allele_frq)+'\t'+str(llrs[0])+'\t'+additive_out+
-                      '\t'+str(llrs[1])+'\t'+additive_av_out+'\t'+variance_out+'\n')
+        outfile.write(str(args.start+loc) + '\t' + str(allele_frq)+'\t'+str(likelihood)+'\t'+additive_av_out+'\t'+variance_out+'\n')
     outfile.close()
     return
 
@@ -675,13 +618,12 @@ if __name__ == "__main__":
                         default=None)
     parser.add_argument('--h2_init',type=float,help='Initial value for variance explained by random effects (default 0.05)',
                         default=0.05)
-    parser.add_argument('--phen_index',type=int,help='If phenotype file contains multiple phenotypes, which row to choose (default 0)',
-                        default=0)
+    parser.add_argument('--phen_index',type=int,help='If phenotype file contains multiple phenotypes, which column to choose (default 1, first)',
+                        default=1)
     parser.add_argument('--min_maf',type=float,help='Minimum minor allele frequency (default 0.05)',default=0.05)
     parser.add_argument('--max_missing',type=float,help='Maximum percent of missing genotype calls (default 5)',default=5)
     parser.add_argument('--missing_char',type=str,help='Missing value string in phenotype file (default NA)',default='NA')
     parser.add_argument('--approx_grad',action='store_false',default=False)
-    parser.add_argument('--full_cov',action='store_true',default=True)
     parser.add_argument('--fit_mean_covariates',action='store_true',default=False)
     parser.add_argument('--fit_variance_covariates',action='store_true',default=False)
 
@@ -701,7 +643,7 @@ if __name__ == "__main__":
         pheno_noNA=args.phenotype[np.logical_not(np.isnan(args.phenotype))]
         args.phenotype=args.phenotype/pheno_noNA.std()
     elif args.phenotype.ndim==2:
-        args.phenotype=args.phenotype[:,args.phen_index]
+        args.phenotype=args.phenotype[:,args.phen_index-1]
         pheno_noNA=args.phenotype[np.logical_not(np.isnan(args.phenotype))]
         args.phenotype=args.phenotype/pheno_noNA.std()
     else:
@@ -727,9 +669,12 @@ if __name__ == "__main__":
                 gts_with_obs.append(i)
                 if random_gts_NAs[i]>0:
                     gt_mean=np.mean(args.selected_genotypes[np.logical_not(random_isnan[:,i]),i])
+                    gt_sd=np.std(args.selected_genotypes[np.logical_not(random_isnan[:,i]),i])
                     args.selected_genotypes[random_isnan[:,i],i]=gt_mean
+                    args.selected_genotypes[:,i]=(args.selected_genotypes[:,i]-gt_mean)/gt_sd
         # Keep only columns with observations
         args.selected_genotypes=args.selected_genotypes[:,gts_with_obs]
+
 
     # Match with geno IDs
     random_ids_dict=id_dict_make(np.array(random_gts_f.iid))
