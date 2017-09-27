@@ -441,11 +441,6 @@ if __name__ == "__main__":
     pheno_id_match=np.array([pheno_id_dict[tuple(x)] for x in geno_ids])
     args.phenotype=args.phenotype[pheno_id_match]
 
-    # Match with geno IDs
-    random_ids_dict=id_dict_make(np.array(random_gts_f.iid))
-    random_ids_match=np.array([random_ids_dict[tuple(x)] for x in geno_ids])
-    args.selected_genotypes=args.selected_genotypes[random_ids_match,:]
-
     ## Get covariates
     if not args.mean_covar==None:
         mean_covar_f=Pheno(args.mean_covar,iid_if_none=geno_ids,missing=args.missing_char).read()
