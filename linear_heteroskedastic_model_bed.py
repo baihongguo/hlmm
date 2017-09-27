@@ -380,9 +380,11 @@ def learn_models_chr(args):
     return
 
 def id_dict_make(ids):
+    if not type(ids)==np.ndarray:
+        raise(ValueError('Unsupported ID type: should be numpy nd.array'))
     id_dict={}
     for id_index in xrange(0,len(ids)):
-        id_dict[ids[id_index]]=id_index
+        id_dict[tuple(ids[id_index,:])]=id_index
     return id_dict
 
 
