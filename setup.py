@@ -1,9 +1,9 @@
 from setuptools import setup
 
-setup(name='hlm',
+setup(name='hlmm',
       version='1.2.0a1',
       description='Functions for fitting heteroskedastic linear (mixed) models to genetic data',
-      url='http://github.com/alexTISYoung/hlm',
+      url='http://github.com/alexTISYoung/hlmm',
       author='Alexander I. Young',
       author_email='alextisyoung@gmail.com',
       license='MIT',
@@ -27,7 +27,7 @@ setup(name='hlm',
             'Programming Language :: Python :: 2.7',
       ],
       keywords='statistics genetics heteroskedastic linear mixed model',
-      packages=['hlm'],
+      packages=['hlmm'],
       install_requires=[
             'numpy',
             'scipy',

@@ -124,9 +124,11 @@ class model(object):
                                 bounds=parbounds)
         # Get MLE
         optim = {}
+        optim['success']=True
         optim['warnflag'] = optimized[2]['warnflag']
         if optim['warnflag']!=0:
             print('Optimization unsuccessful.')
+            optim['success']=False
         optim['beta'] = optimized[0][0:self.n_fixed_variance]
         optim['h2'] = optimized[0][self.n_fixed_variance]
         optim['alpha'] = self.alpha_mle(optim['beta'],optim['h2'])
