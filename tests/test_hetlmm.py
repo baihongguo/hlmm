@@ -1,4 +1,4 @@
-from hlm import hetlmm
+from hlmm import hetlmm
 import numdifftools as nd
 import numpy as np
 import unittest
@@ -29,7 +29,7 @@ class test_hlm_functions(unittest.TestCase):
                         logdet=np.linalg.slogdet(Sigma)
                         logdet=logdet[0]*logdet[1]
                         Sigma_inv = np.linalg.inv(Sigma)
-                        hlm_mod= hlm.hlm_model(y, X, V)
+                        hlm_mod= hetlmm.model(y, X, V)
                         lik=hlm_mod.likelihood(beta,alpha)
                         resid=y-X.dot(alpha)
                         safe_lik=np.dot(resid.T,Sigma_inv.dot(resid))+logdet
@@ -53,7 +53,7 @@ class test_hlm_functions(unittest.TestCase):
                         y=y*np.exp(Vb/2.0)+X.dot(alpha)
                         Sigma = np.diag(np.exp(Vb))
                         Sigma_inv=np.linalg.inv(Sigma)
-                        hlm_mod= hlm.hlm_model(y, X, V)
+                        hlm_mod=hetlmm.model(y, X, V)
                         alpha=hlm_mod.alpha_mle(beta)
                         safe_alpha=np.linalg.solve(np.dot(X.T,Sigma_inv.dot(X)),np.dot(X.T,Sigma_inv.dot(y)))
                         testing.assert_almost_equal(alpha,safe_alpha,decimal=5)
@@ -70,7 +70,7 @@ class test_hlm_functions(unittest.TestCase):
                         X=np.random.randn((n*c)).reshape((n,c))
                         V = np.random.randn((n * v)).reshape((n, v))
                         y=np.random.randn((n))
-                        hlm_mod = hlm.hlm_model(y, X, V)
+                        hlm_mod = hetlmm.model(y, X, V)
                         alpha=np.zeros((c))
                         def likelihood(beta):
                             return hlm_mod.likelihood(beta,alpha)
