@@ -1,9 +1,10 @@
-import hetlm
 import numpy as np
 from scipy import linalg
 from scipy.optimize import fmin_l_bfgs_b
 from scipy.stats import zscore
-import code
+
+from hlmm import hetlm
+
 
 class model(object):
     """
@@ -43,9 +44,11 @@ class model(object):
         # random effects design matrix
         self.G = G
 
+    def likelihood(self,beta,h2):
+        return self.likelihood_and_gradient(beta,h2,return_grad=False)
 
     # Compute likelihood of data given beta, alpha
-    def likelihood_and_gradient(self,beta,h2):
+    def likelihood_and_gradient(self,beta,h2,return_grad=True):
         ## Calculate common variables
         # heteroscedasticity
         Vb = np.dot(self.V, beta)
@@ -75,15 +78,18 @@ class model(object):
         ### Calculate likelihood
         L = np.sum(Vb) + np.sum(resid_square * D_inv) + logdet_Lambda - h2 * np.dot(np.transpose(rnd_resid),
                                                                                     Lambda_inv_rnd_resid)
-        ### Calculate gradient
-        grad = np.zeros((self.n_fixed_variance+1))
-        # Calculate gradient with respect to beta
-        k = var_weight(h2, resid, self.G, Lambda_inv, Lambda_inv_rnd_resid)
-        n1t = np.ones((self.n)).reshape((1, self.n))
-        grad[0:self.n_fixed_variance] = np.dot(n1t, np.transpose(np.transpose(self.V) * (1 - k * D_inv)))
-        # Calculate gradient with respect to h2
-        grad[self.n_fixed_variance] = grad_h2_inner(Lambda_inv, G_cov, Lambda_inv_rnd_resid)
-        return L, grad
+        if return_grad:
+            ### Calculate gradient
+            grad = np.zeros((self.n_fixed_variance+1))
+            # Calculate gradient with respect to beta
+            k = var_weight(h2, resid, self.G, Lambda_inv, Lambda_inv_rnd_resid)
+            n1t = np.ones((self.n)).reshape((1, self.n))
+            grad[0:self.n_fixed_variance] = np.dot(n1t, np.transpose(np.transpose(self.V) * (1 - k * D_inv)))
+            # Calculate gradient with respect to h2
+            grad[self.n_fixed_variance] = grad_h2_inner(Lambda_inv, G_cov, Lambda_inv_rnd_resid)
+            return L/np.float64(self.n), grad/np.float64(self.n)
+        else:
+            return L/np.float64(self.n)
 
     # OLS solution for alpha
     def alpha_ols(self):
@@ -133,7 +139,7 @@ class model(object):
         optim['h2'] = optimized[0][self.n_fixed_variance]
         optim['alpha'] = self.alpha_mle(optim['beta'],optim['h2'])
         # Get parameter covariance
-        optim['likelihood'] = -0.5*(optimized[1]+self.n*np.log(2*np.pi))
+        optim['likelihood'] = -0.5*np.float64(self.n)*(optimized[1]+np.log(2*np.pi))
 
         # Compute parameter covariance
         if SEs:
@@ -215,20 +221,8 @@ class model(object):
 
 
 def simulate(n,l,alpha,beta,h2):
-    if (l<n):
-        print('Slow compared to fast_simulate function when n>l')
-    v = beta.shape[0]
-    c = alpha.shape[0]
-    X = np.random.randn((n * c)).reshape((n, c))
-    V = np.random.randn((n * v)).reshape((n, v))
-    G = np.random.binomial(2,0.5,(n,l))
-    Sigma = np.diag(np.exp(V.dot(beta)))+h2*G.dot(G.T)/float(l)
-    y = np.random.multivariate_normal(X.dot(alpha),Sigma)
-    return model(y,X,V,G)
-
-def fast_simulate(n,l,alpha,beta,h2):
     if (l>n):
-        raise(ValueError('Fast simulate appropriate for n>l'))
+        print('Simulation slow for n>l')
     c = alpha.shape[0]
     v = beta.shape[0]
     X = np.random.randn((n * c)).reshape((n, c))

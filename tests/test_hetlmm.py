@@ -1,82 +1,85 @@
-from hlmm import hetlmm
+import unittest
+
 import numdifftools as nd
 import numpy as np
-import unittest
 from numpy import testing
 
-
-class test_hlm_functions(unittest.TestCase):
-
+from hlmm import hetlmm
 
 
-    def test_likelihood(self):
-        for n in [10**3]:
+class test_hlmm_functions(unittest.TestCase):
+
+
+
+    def test_likelihood_and_beta(self):
+        for n in [10**2]:
             for v in [2]:
                 if v>n:
                     v=n
-                for c in [1,2,10]:
+                for c in [2]:
                     if c>n:
                         c=n
-                    for i in xrange(0,10**3):
-                        model = hetlmm.simulate(n,l,np.zeros((c)),np.zeros((v)),0.1)
-                        X=np.random.randn((n*c)).reshape((n,c))
-                        V = np.random.randn((n * v)).reshape((n, v))
-                        y=np.random.randn((n))
+                    for i in xrange(0,100):
+                        l=100
                         alpha=np.random.randn((c))
-                        beta = np.random.randn((v))
-                        Vb = np.dot(V, beta)
-                        Sigma = np.diag(np.exp(Vb))
+                        beta = np.random.randn((v))/10
+                        model = hetlmm.simulate(n, l, alpha, beta, 0.1)
+                        Vb = np.dot(model.V, beta)
+                        Sigma = np.diag(np.exp(Vb))+0.1*model.G.dot(model.G.T)
                         logdet=np.linalg.slogdet(Sigma)
                         logdet=logdet[0]*logdet[1]
                         Sigma_inv = np.linalg.inv(Sigma)
-                        hlm_mod= hetlmm.model(y, X, V)
-                        lik=hlm_mod.likelihood(beta,alpha)
-                        resid=y-X.dot(alpha)
+                        L = model.likelihood(beta,0.1)
+                        resid=model.y-model.X.dot(model.alpha_mle(beta,0.1))
                         safe_lik=np.dot(resid.T,Sigma_inv.dot(resid))+logdet
-                        testing.assert_almost_equal(lik,safe_lik,decimal=5)
+                        testing.assert_almost_equal(L,safe_lik/float(n),decimal=5)
+
 
     def test_alpha_mle(self):
-        for n in [1,2,10**2]:
-            for v in [1,2,10]:
+        for n in [10**2]:
+            for v in [2]:
                 if v>n:
                     v=n
-                for c in [1,2,10]:
+                for c in [2]:
                     if c>n:
                         c=n
-                    for i in xrange(0,10**3):
-                        X=np.random.randn((n*c)).reshape((n,c))
-                        V=np.random.randn((n*v)).reshape((n,v))
-                        alpha=np.random.randn((c))
-                        y=np.random.randn((n))
-                        beta=np.random.randn((v))/10
-                        Vb = np.dot(V, beta)
-                        y=y*np.exp(Vb/2.0)+X.dot(alpha)
-                        Sigma = np.diag(np.exp(Vb))
+                    for i in xrange(0,100):
+                        l = 100
+                        alpha = np.random.randn((c))
+                        beta = np.random.randn((v)) / 10
+                        model = hetlmm.simulate(n, l, alpha, beta, 0.1)
+                        Vb = np.dot(model.V, beta)
+                        Sigma = np.diag(np.exp(Vb)) + 0.1 * model.G.dot(model.G.T)
                         Sigma_inv=np.linalg.inv(Sigma)
-                        hlm_mod=hetlmm.model(y, X, V)
-                        alpha=hlm_mod.alpha_mle(beta)
-                        safe_alpha=np.linalg.solve(np.dot(X.T,Sigma_inv.dot(X)),np.dot(X.T,Sigma_inv.dot(y)))
-                        testing.assert_almost_equal(alpha,safe_alpha,decimal=5)
+                        safe_alpha=np.linalg.solve(np.dot(model.X.T,Sigma_inv.dot(model.X)),np.dot(model.X.T,Sigma_inv.dot(model.y)))
+                        testing.assert_almost_equal(model.alpha_mle(beta,0.1),safe_alpha,decimal=5)
 
     def test_grad_beta(self):
-        for n in [1,2,10**2]:
-            for v in [1,2,10]:
+        for n in [10**2]:
+            for v in [2,10,100]:
                 if v>n:
                     v=n
-                for c in [1,2,10]:
+                for c in [2]:
                     if c>n:
                         c=n
-                    for i in xrange(0,10**3):
-                        X=np.random.randn((n*c)).reshape((n,c))
-                        V = np.random.randn((n * v)).reshape((n, v))
-                        y=np.random.randn((n))
-                        hlm_mod = hetlmm.model(y, X, V)
-                        alpha=np.zeros((c))
-                        def likelihood(beta):
-                            return hlm_mod.likelihood(beta,alpha)
+                    for i in xrange(0,100):
+                        l = 100
+                        alpha = np.random.randn((c))/10
+                        beta = np.random.randn((v)) / 10
+                        model = hetlmm.simulate(n, l, alpha, beta, 0.1)
+                        vpar=np.zeros((v+1))
+                        vpar[0:v]=np.random.randn((v))/10
+                        vpar[v]=np.random.uniform(0.0005,1)
+                        L, gradb = model.likelihood_and_gradient(vpar[0:v], vpar[v])
                         # Compute gradient numerically
-                        num_grad=nd.Gradient(likelihood)(np.zeros((v)))
-                        testing.assert_almost_equal(num_grad,hlm_mod.grad_beta(np.zeros((v)),alpha).reshape((v)),decimal=5)
+                        def likelihood(vpars):
+                            return model.likelihood(vpars[0:v],vpars[v])
+                        num_grad=np.zeros((v+1))
+                        diffs=np.identity(v+1)*10**(-6)
+                        for i in xrange(0,v+1):
+                            num_grad[i]=(likelihood(vpar+diffs[i,:])-likelihood(vpar-diffs[i,:]))/(2*10**(-6))
+                        # Compute analytically
+                        testing.assert_almost_equal(num_grad,gradb.reshape((v+1)),decimal=5)
 
 
 

@@ -1,8 +1,10 @@
-from hlmm import hetlm
+import unittest
+
 import numdifftools as nd
 import numpy as np
-import unittest
 from numpy import testing
+
+from hlmm import hetlm
 
 
 class test_hetlm_functions(unittest.TestCase):
@@ -73,7 +75,7 @@ class test_hetlm_functions(unittest.TestCase):
                             return hetlm_mod.likelihood(beta,alpha)
                         # Compute gradient numerically
                         num_grad=nd.Gradient(likelihood)(np.zeros((v)))
-                        testing.assert_almost_equal(num_grad,hlm_mod.grad_beta(np.zeros((v)),alpha).reshape((v)),decimal=5)
+                        testing.assert_almost_equal(num_grad,hetlm_mod.grad_beta(np.zeros((v)),alpha).reshape((v)),decimal=5)
 
 
 
