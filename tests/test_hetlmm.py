@@ -1,6 +1,4 @@
 import unittest
-
-import numdifftools as nd
 import numpy as np
 from numpy import testing
 
@@ -8,7 +6,6 @@ from hlmm import hetlmm
 
 
 class test_hlmm_functions(unittest.TestCase):
-
 
 
     def test_likelihood_and_beta(self):
@@ -19,7 +16,7 @@ class test_hlmm_functions(unittest.TestCase):
                 for c in [2]:
                     if c>n:
                         c=n
-                    for i in xrange(0,100):
+                    for i in xrange(0,10):
                         l=100
                         alpha=np.random.randn((c))
                         beta = np.random.randn((v))/10
@@ -29,7 +26,7 @@ class test_hlmm_functions(unittest.TestCase):
                         logdet=np.linalg.slogdet(Sigma)
                         logdet=logdet[0]*logdet[1]
                         Sigma_inv = np.linalg.inv(Sigma)
-                        L = model.likelihood(beta,0.1)
+                        L = model.likelihood(beta,0.1,negative=True)
                         resid=model.y-model.X.dot(model.alpha_mle(beta,0.1))
                         safe_lik=np.dot(resid.T,Sigma_inv.dot(resid))+logdet
                         testing.assert_almost_equal(L,safe_lik/float(n),decimal=5)
@@ -43,7 +40,7 @@ class test_hlmm_functions(unittest.TestCase):
                 for c in [2]:
                     if c>n:
                         c=n
-                    for i in xrange(0,100):
+                    for i in xrange(0,10):
                         l = 100
                         alpha = np.random.randn((c))
                         beta = np.random.randn((v)) / 10
@@ -62,7 +59,7 @@ class test_hlmm_functions(unittest.TestCase):
                 for c in [2]:
                     if c>n:
                         c=n
-                    for i in xrange(0,100):
+                    for i in xrange(0,10):
                         l = 100
                         alpha = np.random.randn((c))/10
                         beta = np.random.randn((v)) / 10
@@ -73,7 +70,7 @@ class test_hlmm_functions(unittest.TestCase):
                         L, gradb = model.likelihood_and_gradient(vpar[0:v], vpar[v])
                         # Compute gradient numerically
                         def likelihood(vpars):
-                            return model.likelihood(vpars[0:v],vpars[v])
+                            return model.likelihood(vpars[0:v],vpars[v],negative=True)
                         num_grad=np.zeros((v+1))
                         diffs=np.identity(v+1)*10**(-6)
                         for i in xrange(0,v+1):

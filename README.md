@@ -1,17 +1,17 @@
 # hlmm
 hlmm is a python library for fitting heteroskedastic linear mixed models to genetic data. 
 
-A heteroskedastic linear model can model the effect
+A heteroskedastic linear model (HLM) can model the effect
 of a set of variables on the mean of a response (such as a continuous phenotype) and the 
 effect of a (potentially different) set of variables of the variability of the response
 
-The heteroskedastic linear model models all effects on both the mean and variance of a response as fixed effects.
-The heteroskedastic linear mixed model adds modelling of random effects of a set of variables on the mean of the response. 
+A HLM models all effects on both the mean and variance of a response as fixed effects.
+A heteroskedastic linear mixed model (HLMM) adds modelling of random effects of a set of variables on the mean of the response. 
 
-Modelling random effects can make fitting of heteroskedastic linear mixed models very computationally demanding,
+Modelling random effects can make fitting a HLMM very computationally demanding,
 with the number of operations scaling with the cube of sample size. 
 
-The package hlmm provides the ability to fit heteroskedastic linear mixed models
+The package hlmm provides the ability to fit a HLMM
 much more quickly when the number of variables with random effects is small compared 
 to the sample size. We use an algorithm whose operations scale in proportion to the sample
 size multiplied by the number of random effects squared. 
@@ -20,16 +20,16 @@ Find the hlmm documentation at: documentation link here.
 
 # Main features:
 
-Heteroskedastic linear model class: given data, find the parameters that maximise
+HLM class: given data, find the parameters that maximise
 the likelihood and their sampling distribution. 
 
-Heteroskedastic linear model class: given data, find the parameters that maximise
+HLMM class: given data, find the parameters that maximise
 the likelihood and their sampling distribution. 
 
 hlmm_chr.py: command line script that fits heteroskedastic linear models or 
 heteroskedastic linear mixed models to a contiguous segment of the genome.
 The script takes bed formatted genotypes as input. and can incorporate
-covariates for the fixed effects on the mean and variance. 
+covariates for the fixed effects on the mean and/or variance. 
 
 # Quick install
 

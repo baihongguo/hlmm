@@ -10,14 +10,14 @@ from hlmm import hetlm
 class test_hetlm_functions(unittest.TestCase):
 
     def test_likelihood(self):
-        for n in [1,2,10**2]:
+        for n in [10**2]:
             for v in [1,2,10]:
                 if v>n:
                     v=n
                 for c in [1,2,10]:
                     if c>n:
                         c=n
-                    for i in xrange(0,10**3):
+                    for i in xrange(0,10**2):
                         X=np.random.randn((n*c)).reshape((n,c))
                         V = np.random.randn((n * v)).reshape((n, v))
                         y=np.random.randn((n))
@@ -29,20 +29,20 @@ class test_hetlm_functions(unittest.TestCase):
                         logdet=logdet[0]*logdet[1]
                         Sigma_inv = np.linalg.inv(Sigma)
                         hetlm_mod= hetlm.model(y, X, V)
-                        lik=hetlm_mod.likelihood(beta,alpha)
+                        lik=hetlm_mod.likelihood(beta,alpha,negative=True)/float(n)
                         resid=y-X.dot(alpha)
                         safe_lik=np.dot(resid.T,Sigma_inv.dot(resid))+logdet
-                        testing.assert_almost_equal(lik,safe_lik,decimal=5)
+                        testing.assert_almost_equal(lik,safe_lik/float(n),decimal=5)
 
     def test_alpha_mle(self):
-        for n in [1,2,10**2]:
+        for n in [10**2]:
             for v in [1,2,10]:
                 if v>n:
                     v=n
                 for c in [1,2,10]:
                     if c>n:
                         c=n
-                    for i in xrange(0,10**3):
+                    for i in xrange(0,10**2):
                         X=np.random.randn((n*c)).reshape((n,c))
                         V=np.random.randn((n*v)).reshape((n,v))
                         alpha=np.random.randn((c))
@@ -58,21 +58,21 @@ class test_hetlm_functions(unittest.TestCase):
                         testing.assert_almost_equal(alpha,safe_alpha,decimal=5)
 
     def test_grad_beta(self):
-        for n in [1,2,10**2]:
+        for n in [10**2]:
             for v in [1,2,10]:
                 if v>n:
                     v=n
                 for c in [1,2,10]:
                     if c>n:
                         c=n
-                    for i in xrange(0,10**3):
+                    for i in xrange(0,10**2):
                         X=np.random.randn((n*c)).reshape((n,c))
                         V = np.random.randn((n * v)).reshape((n, v))
                         y=np.random.randn((n))
                         hetlm_mod = hetlm.model(y, X, V)
                         alpha=np.zeros((c))
                         def likelihood(beta):
-                            return hetlm_mod.likelihood(beta,alpha)
+                            return hetlm_mod.likelihood(beta,alpha,negative=True)
                         # Compute gradient numerically
                         num_grad=nd.Gradient(likelihood)(np.zeros((v)))
                         testing.assert_almost_equal(num_grad,hetlm_mod.grad_beta(np.zeros((v)),alpha).reshape((v)),decimal=5)
