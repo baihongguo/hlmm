@@ -156,7 +156,7 @@ class model(object):
         optim['beta_se'] = np.sqrt(np.diag(optim['beta_cov']))
         optim['alpha_cov'] = self.alpha_cov(beta_mle)
         optim['alpha_se'] = np.sqrt(np.diag(optim['alpha_cov']))
-        optim['likelihood'] = -0.5 * (optimized['fun'] + self.n * np.log(2 * np.pi))
+        optim['likelihood'] = -0.5 *self.n * (optimized['fun'] + np.log(2 * np.pi))
         optim['success']=optimized.success
         return optim
 
