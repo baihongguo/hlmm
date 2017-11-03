@@ -8,7 +8,7 @@ setup(name='hlmm',
       author='Alexander I. Young',
       author_email='alextisyoung@gmail.com',
       license='MIT',
-      scripts=['bin/hlmm.py'],
+      scripts=['bin/hlmm_chr.py'],
       classifiers=[
             # How mature is this project? Common values are
             #   3 - Alpha
@@ -17,11 +17,11 @@ setup(name='hlmm',
             'Development Status :: 3 - Alpha',
 
             # Indicate who your project is intended for
-            'Intended Audience :: Users',
-            'Topic :: Statistical Genetics :: Analysis Tools',
+            'Intended Audience :: Science/Research',
+            'Topic :: Scientific/Engineering :: Bio-Informatics',
 
             # Pick your license as you wish (should match "license" above)
-            'License :: MIT License',
+            'License :: OSI Approved :: MIT License',
 
             # Specify the Python versions you support here. In particular, ensure
             # that you indicate whether you support Python 2, Python 3 or both.

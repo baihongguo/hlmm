@@ -35,6 +35,18 @@ covariates for the fixed effects on the mean and/or variance.
 
 Pip install instructions here. 
 
+# Easy installation
+
+We recommend installing using pip (https://pip.pypa.io/en/stable/). 
+At the command line, type
+
+    'sudo pip install hlmm'
+    
+# Documentation
+
+We recommend reading the documentation for this package (http://hlmm.readthedocs.io/en/latest/) and 
+working through the tutorial (http://hlmm.readthedocs.io/en/latest/tutorial.html)
+
 # Detailed Package Install Instructions
 
 hlmm has the following dependencies:
