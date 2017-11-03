@@ -97,7 +97,7 @@ By inferring the relationship between additive effects and log-linear variance e
 
 We have prepared an R script that estimates dispersion effects and adds them to the results table. To estimate dispersion effects, type
 
-   ``source('estimate_dispersion_effect.R)``
+   ``source('estimate_dispersion_effect.R')``
 
 The first SNP should have a dispersion effect. To see if there is evidence for this, example 'results[1,]', in particular, whether 'dispersion_pval' is large for the first SNP.
 
