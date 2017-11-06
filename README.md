@@ -45,7 +45,7 @@ At the command line, type
 # Documentation
 
 We recommend reading the documentation for this package (http://hlmm.readthedocs.io/en/latest/) and 
-working through the tutorial (http://hlmm.readthedocs.io/en/latest/tutorial.html)
+working through the tutorial (http://hlmm.readthedocs.io/en/latest/tutorial.html).
 
 # Detailed Package Install Instructions
 

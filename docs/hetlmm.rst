@@ -3,21 +3,12 @@
    You can adapt this file completely to your liking, but it should at least
    contain the root `toctree` directive.
 
-Welcome to hlmm's documentation!
+Documentation for 'hetlmm' module
 ================================
 
-.. toctree::
-   :maxdepth: 2
-   :caption: Contents:
+Documentation for the heteroskedastic linear mixed model class.
 
-   intro
-   tutorial
-   hetlm
-   hetlmm
+.. automodule:: hetlmm
 
-Indices and tables
-==================
-
-* :ref:`genindex`
-* :ref:`modindex`
-* :ref:`search`
+.. autoclass:: hetlmm.model
+    :members:

@@ -2,14 +2,22 @@ import numpy as np
 from scipy.optimize import minimize
 
 class model(object):
-    """
-    Define a heteroskedastic linear model and calculate likelihood, gradients, and maximum likelihood estimates of
+    """Define a heteroskedastic linear model and calculate likelihood, gradients, and maximum likelihood estimates of
     parameters.
-    :param y: (n) or (n,1) numpy array of phenotype observations
-    :param X: (n) or (n,c) numpy array of n observations of variables. This is the design matrix for the fixed mean effects.
-    :param V: (n) or (n,v) numpy array of n observations of variables. This is the design matrix for the fixed variance effects.
 
-    :return: heteroskedastic linear model
+    Parameters
+    ----------
+    y : :class:`~numpy:numpy.array`
+        1D array of phenotype observations
+    X : :class:`~numpy:numpy.array`
+        This is the design matrix for the fixed mean effects.
+    V : :class:`~numpy:numpy.array`
+        This is the design matrix for the fixed variance effects.
+
+    Returns
+    -------
+    model : :class:`hetlm.model`
+        heteroskedastic linear model class with input data
     """
     def __init__(self,y,X,V):
         # Get sample size
@@ -38,13 +46,21 @@ class model(object):
 
     # Compute likelihood of data given beta, alpha
     def likelihood(self,beta,alpha,negative=False):
-        """
-        Compute the log of the likelihood, the likelihood at the maximum likelihood for the fixed mean effects
-        :param alpha: value of fixed mean effects to compute likelihood for
-        :param beta: value of fixed variance effects to compute likelihood for
-        :param negative: compute -2*L/n-log(2*pi), where L is the log-likelihood, the function that is minimized to find the MLE. Default is False.
+        """Compute the log of the likelihood, the likelihood at the maximum likelihood for the fixed mean effects
 
-        :return: L, log-likelihood of data given parameters.
+        Parameters
+        ----------
+        alpha : :class:`~numpy:numpy.array`
+            value of fixed mean effects to compute likelihood for
+        beta : :class:`~numpy:numpy.array`
+            value of fixed variance effects to compute likelihood for
+        negative : bool
+            compute -2*L/n-log(2*pi), where L is the log-likelihood, the function that is minimized to find the MLE. Default is False.
+
+        Returns
+        -------
+        L : :class:`float`
+            log-likelihood of data given parameters.
 
         """
         Vbeta = self.V.dot(beta)
@@ -56,13 +72,18 @@ class model(object):
 
     # Compute MLE of alpha given beta
     def alpha_mle(self,beta):
-        """
-                Compute the maximum likelihood estimate of the fixed mean effect parameters, given
-                particular fixed variance effect parameters and variance of random effects
-                :param beta: value of fixed variance effects
+        """Compute the maximum likelihood estimate of the fixed mean effect parameters, given
+        particular fixed variance effect parameters and variance of random effects
 
+        Parameters
+        ----------
+        beta : :class:`~numpy:numpy.array`
+            value of fixed variance effects
 
-                :return: alpha, 1d numpy array
+        Returns
+        -------
+        alpha : :class:`~numpy:numpy.array`
+            maximum likelihood estimate of alpha given beta
         """
         D_inv = np.exp(-self.V.dot(beta))
         X_t_D_inv = np.transpose(self.X) * D_inv
@@ -71,13 +92,20 @@ class model(object):
 
     # Compute gradient with respect to beta for a given beta and alpha
     def grad_beta(self,beta, alpha):
-        """
-        Compute the gradient with respect to the fixed variance effects of -2*L/n-log(2*pi),
+        """Compute the gradient with respect to the fixed variance effects of -2*L/n-log(2*pi),
         where L is the log-likelihood, the function that is minimized to find the MLE
-        :param alpha: value of fixed mean effects to compute likelihood for
-        :param beta: value of fixed variance effects to compute likelihood for
 
-        :return: grad_beta, 1d numpy array
+        Parameters
+        ----------
+        beta : :class:`~numpy:numpy.array`
+            value of fixed variance effects
+
+        alpha : :class:`~numpy:numpy.array`
+            value of fixed mean effects to gradient for
+
+        Returns
+        -------
+        grad_beta : :class:`~numpy:numpy.array`
 
         """
         D_inv = np.exp(-self.V.dot(beta))
@@ -89,20 +117,25 @@ class model(object):
 
     # OLS solution for alpha
     def alpha_ols(self):
-        """
-                Compute the ordinary least squares (OLS) estimate of the fixed mean effect parameters
+        """Compute the ordinary least squares (OLS) estimate of the fixed mean effect parameters
 
-                :return: alpha, 1d numpy array
+        Returns
+        -------
+        alpha : :class:`~numpy:numpy.array`
+            ordinary least-squares estimate of alpha
         """
         # Get initial guess for alpha
         return np.linalg.solve(np.dot(self.X.T, self.X), np.dot(self.X.T, self.y))
 
     # Find an approximation to the MLE of beta given alpha
     def approx_beta_mle(self):
-        """
-                Analytical approximation to the maximum likelihood estimate of the fixed variance effects
+        """Analytical approximation to the maximum likelihood estimate of the fixed variance effects
 
-                :return: beta, 1d numpy array
+
+        Returns
+        -------
+        beta : :class:`~numpy:numpy.array`
+            approximate MLE of beta
         """
         # Get alpha OLS
         alpha=self.alpha_ols()
@@ -128,13 +161,15 @@ class model(object):
         return np.linalg.inv(precision)
 
     def optimize_model(self):
-        """
-                Find the maximum likelihood estimate (MLE) of the parameters and their sampling distribution.
+        """Find the maximum likelihood estimate (MLE) of the parameters and their sampling distribution.
 
-                :return: optim, dictionary with MLEs ('alpha', fixed mean effects; 'beta', fixed variance effects),
-                their standard errors ('alpha_se', 'beta_se', 'h2_se'),
-                covariance matrix for sampling distribution of parameter vectors ('beta_cov' and 'alpha_cov'),
-                maximum likelihood ('likelihood'), whether optimisation was successful ('success'),
+        Returns
+        -------
+        optim : :class:`dict`
+            keys: MLEs ('alpha', fixed mean effects; 'beta', fixed variance effects),
+            their standard errors ('alpha_se', 'beta_se', 'h2_se'),
+            covariance matrix for sampling distribution of parameter vectors ('beta_cov' and 'alpha_cov'),
+            maximum likelihood ('likelihood'), whether optimisation was successful ('success'),
         """
         # Get initial guess for beta
         beta_init = self.approx_beta_mle()
@@ -159,6 +194,7 @@ class model(object):
         optim['likelihood'] = -0.5 *self.n * (optimized['fun'] + np.log(2 * np.pi))
         optim['success']=optimized.success
         return optim
+
 
 ##### Functions to pass to opimizer ######
 def likelihood_beta(beta,*args):
