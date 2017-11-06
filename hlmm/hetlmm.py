@@ -13,15 +13,24 @@ Class: model
 """
 
 class model(object):
-    """
-    Define a heteroskedastic linear mixed model and calculate likelihood, gradients, and maximum likelihood estimates of
+    """Define a heteroskedastic linear mixed model and calculate likelihood, gradients, and maximum likelihood estimates of
     parameters.
-    :param y: (n) or (n,1) numpy array of phenotype observations
-    :param X: (n) or (n,c) numpy array of n observations of variables. This is the design matrix for the fixed mean effects.
-    :param V: (n) or (n,v) numpy array of n observations of variables. This is the design matrix for the fixed variance effects.
-    :param G: (n) or (n,l) numpy array of n observations of variables. This is the design matrix for the random effects.
 
-    :return: heteroskedastic linear mixed model
+    Parameters
+    ----------
+    y : :class:`~numpy:numpy.array`
+        1D array of phenotype observations
+    X : :class:`~numpy:numpy.array`
+        Design matrix for the fixed mean effects.
+    V : :class:`~numpy:numpy.array`
+        Design matrix for the fixed variance effects.
+    G : :class:`~numpy:numpy.array`
+        Design matrix for the random effects.
+
+    Returns
+    -------
+    model : :class:`hetlmm.model`
+        heteroskedastic linear mixed model class with input data
     """
     def __init__(self,y,X,V,G):
         # Get sample size
@@ -62,11 +71,17 @@ class model(object):
     def likelihood(self,beta,h2,negative=False):
         """
         Compute the log of the profile likelihood, the likelihood at the maximum likelihood for the fixed mean effects
-        :param beta: value of fixed variance effects to compute likelihood for
-        :param h2: value of variance explained by random effects to compute likelihood for
-        :param negative: compute -2*L/n-log(2*pi), where L is the log-likelihood, the function that is minimized to find the MLE. Default is False.
+        beta : :class:`~numpy:numpy.array`
+            value of fixed variance effects to compute likelihood for
+        h2: :class:`float`
+            value of variance explained by random effects to compute likelihood for
+        negative : :class:`bool`
+            compute -2*L/n-log(2*pi), where L is the log-likelihood, the function that is minimized to find the MLE. Default is False.
 
-        :return: L, log-likelihood of data given parameters.
+        Returns
+        -------
+        L : :class:`float`
+            log-likelihood of data given parameters.
 
         """
 
@@ -77,17 +92,22 @@ class model(object):
 
     # Compute likelihood of data given beta, alpha
     def likelihood_and_gradient(self,beta,h2,return_grad=True):
-        """
-                Compute the the function that is minimized to find the MLE, LL=-2*L/n-log(2*pi), where L is the log
-                of the profile likelihood, the likelihood at the maximum for the fixed mean effects.
-                Further, compute the gradient with respect to the fixed variance effects and the variance of the random effects.
-                This forms the basis of the function passed to L-BFGS-B in order to find the maximum likelihood parameter estimates.
-                :param beta: value of fixed variance effects
-                :param h2: value of variance explained by random effects
-                :param return_grad: whether to compute and return the gradient as well as the likelihood function. Default is True.
+        """Compute the function that is minimized to find the MLE, LL=-2*L/n-log(2*pi), where L is the log
+        of the profile likelihood, the likelihood at the maximum for the fixed mean effects.
+        Further, compute the gradient with respect to the fixed variance effects and the variance of the random effects.
+        This forms the basis of the function passed to L-BFGS-B in order to find the maximum likelihood parameter estimates.
 
-                :return: [LL,grad], the value of the function to be minimized, LL, and its gradient. The gradient is a 1d numpy array
-                that has the gradient with respect to beta first followed by the gradient with respect to h2.
+        beta : :class:`~numpy:numpy.array`
+            value of fixed variance effects to compute likelihood for
+        h2: :class:`float`
+            value of variance explained by random effects to compute likelihood for
+
+
+        Returns
+        -------
+        [LL,gradient] : :class:`list`
+            the value of the function to be minimized, LL, and its gradient. The gradient is a 1d :class:`~numpy:numpy.array`
+            that has the gradient with respect to beta first followed by the gradient with respect to h2.
         """
         ## Calculate common variables
         # heteroscedasticity
@@ -133,23 +153,32 @@ class model(object):
 
     # OLS solution for alpha
     def alpha_ols(self):
-        """
-                Compute the ordinary least squares (OLS) estimate of the fixed mean effect parameters
+        """Compute the ordinary least squares (OLS) estimate of the fixed mean effect parameters
 
-                :return: alpha, 1d numpy array
+        Returns
+        -------
+        alpha : :class:`~numpy:numpy.array`
+            ordinary least-squares estimate of alpha
         """
         # Get initial guess for alpha
         return np.linalg.solve(np.dot(self.X.T, self.X), np.dot(self.X.T, self.y))
 
     # Compute MLE of alpha given beta
     def alpha_mle(self,beta,h2):
-        """
-                Compute the maximum likelihood estimate of the fixed mean effect parameters, given
-                particular fixed variance effect parameters and variance of random effects
-                :param beta: value of fixed variance effects
-                :param h2: value of variance explained by random effects
+        """Compute the maximum likelihood estimate of the fixed mean effect parameters, given
+        particular fixed variance effect parameters and variance of random effects
 
-                :return: alpha, 1d numpy array
+        Parameters
+        ----------
+        beta : :class:`~numpy:numpy.array`
+            value of fixed variance effects
+        h2: :class:`float`
+            value of variance explained by random effects to compute likelihood for
+
+        Returns
+        -------
+        alpha : :class:`~numpy:numpy.array`
+            maximum likelihood estimate of alpha given beta and h2
         """
         ## Calculate common variables
         # heteroscedasticity
@@ -167,17 +196,24 @@ class model(object):
 
 
     def optimize_model(self,h2,SEs=True,dx=10**(-6)):
-        """
-                Find the maximum likelihood estimate (MLE) of the parameters and their sampling distribution.
-                :param h2: initial value of variance explained by random effects
-                :param SEs: whether to compute sampling distribution of parameter estimates. Default is True.
-                :param dx: the step size used to compute the Hessian for the computing the parameter sampling distribution
+        """Find the maximum likelihood estimate (MLE) of the parameters and their sampling distribution.
 
-                :return: optim, dictionary with MLEs ('alpha', fixed mean effects; 'beta', fixed variance effects;
-                'h2', variance of random effects), their standard errors ('alpha_se', 'beta_se', 'h2_se'),
-                covariance matrix for sampling distribution of parameter vector ('par_cov', in order: alpha, beta, h2),
-                maximum likelihood ('likelihood'), whether optimisation was successful ('success'),
-                warnings from L-BFGS-B optimisation ('warnflag').
+        Parameters
+        ----------
+        h2 : :class:`float`
+            initial value of variance explained by random effects
+        SEs : :class:`bool`
+            whether to compute sampling distribution of parameter estimates. Default is True.
+        dx : :class:`float`
+            the step size used to compute the Hessian for the computing the parameter sampling distribution
+
+        Returns
+        -------
+        optim : :class:`dict`
+            keys: MLEs ('alpha', fixed mean effects; 'beta', fixed variance effects),
+            their standard errors ('alpha_se', 'beta_se', 'h2_se'),
+            covariance matrix for sampling distribution of parameter vector ('par_cov', in order: alpha, beta, h2),,
+            maximum likelihood ('likelihood'), whether optimisation was successful ('success'),warnings from L-BFGS-B optimisation ('warnflag').
         """
         # Initialise parameters
         init_params=np.zeros((self.n_fixed_variance+1))
@@ -288,19 +324,29 @@ class model(object):
 
 
 def simulate(n,l,alpha,beta,h2):
-    """
-            Simulate from a heteroskedastic linear mixed model given a set of parameters. This uses a singular
-            value decomposition to do the simulation quickly when l<<n.
+    """Simulate from a heteroskedastic linear mixed model given a set of parameters. This uses a singular
+    value decomposition to do the simulation quickly when l<<n.
 
-            The function simulates fixed and random effects design matrices of specified dimensions with independent Gaussian entries.
+    The function simulates fixed and random effects design matrices of specified dimensions with independent Gaussian entries.
 
-            :param n: sample size
-            :param l: number of random effects
-            :param alpha: value of fixed mean effects
-            :param beta: value of fixed variance effects
-            :param h2: value of variance explained by random effects
+    Parameters
+    ----------
 
-            :return: hetlmm.model class with simulated data and phenotypes for the given parameters.
+    n : :class:`int`
+        sample size
+    l : :class:`int`
+        number of random effects
+    alpha : :class:`~numpy:numpy.array`
+        value of fixed mean effects
+    beta : :class:`~numpy:numpy.array`
+        value of fixed variance effects
+    h2 : :class:`float`
+        value of variance explained by random effects
+
+    Returns
+    -------
+    model : :class:`hetlmm.model`
+        heteroskedastic linear mixed model with data simulated from given parameters
     """
     if (l>n):
         print('Simulation slow for l>n')

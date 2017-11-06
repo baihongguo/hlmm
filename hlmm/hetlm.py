@@ -54,7 +54,7 @@ class model(object):
             value of fixed mean effects to compute likelihood for
         beta : :class:`~numpy:numpy.array`
             value of fixed variance effects to compute likelihood for
-        negative : bool
+        negative : :class:`bool`
             compute -2*L/n-log(2*pi), where L is the log-likelihood, the function that is minimized to find the MLE. Default is False.
 
         Returns

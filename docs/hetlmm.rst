@@ -4,7 +4,7 @@
    contain the root `toctree` directive.
 
 Documentation for 'hetlmm' module
-================================
+=================================
 
 Documentation for the heteroskedastic linear mixed model class.
 
@@ -12,3 +12,5 @@ Documentation for the heteroskedastic linear mixed model class.
 
 .. autoclass:: hetlmm.model
     :members:
+
+.. autofunction:: hetlmm.simulate
