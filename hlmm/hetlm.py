@@ -10,9 +10,9 @@ class model(object):
     y : :class:`~numpy:numpy.array`
         1D array of phenotype observations
     X : :class:`~numpy:numpy.array`
-        This is the design matrix for the fixed mean effects.
+        Design matrix for the fixed mean effects.
     V : :class:`~numpy:numpy.array`
-        This is the design matrix for the fixed variance effects.
+        Design matrix for the fixed variance effects.
 
     Returns
     -------

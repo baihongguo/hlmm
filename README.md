@@ -31,10 +31,6 @@ heteroskedastic linear mixed models to a contiguous segment of the genome.
 The script takes bed formatted genotypes as input. and can incorporate
 covariates for the fixed effects on the mean and/or variance. 
 
-# Quick install
-
-Pip install instructions here. 
-
 # Easy installation
 
 We recommend installing using pip (https://pip.pypa.io/en/stable/). 
@@ -44,8 +40,8 @@ At the command line, type
     
 # Documentation
 
-We recommend reading the documentation for this package (http://hlmm.readthedocs.io/en/latest/) and 
-working through the tutorial (http://hlmm.readthedocs.io/en/latest/tutorial.html).
+We recommend reading the documentation for this package (http://hlmm.readthedocs.io/en/master/) and 
+working through the tutorial (http://hlmm.readthedocs.io/en/master/tutorial.html).
 
 # Detailed Package Install Instructions
 
