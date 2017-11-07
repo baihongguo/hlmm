@@ -32,7 +32,6 @@ setup(name='hlmm',
       install_requires=[
             'numpy',
             'scipy',
-            'argparse',
             'pysnptools'
         ],
       extras_require={
