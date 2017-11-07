@@ -1,5 +1,5 @@
 Introduction
-************
+============
 hlmm is a python library for fitting heteroskedastic linear mixed models to genetic data.
 
 A heteroskedastic linear model (HLM) can model the effect
@@ -20,7 +20,7 @@ size multiplied by the number of random effects squared.
 Find the hlmm documentation at: documentation link here.
 
 Main features:
-**************
+==============
 
 HLM class: given data, find the parameters that maximise
 the likelihood and their sampling distribution.
@@ -34,7 +34,7 @@ The script takes bed formatted genotypes as input. and can incorporate
 covariates for the fixed effects on the mean and/or variance.
 
 Quick install
-*************
+=============
 
 We recommend installing using pip (https://pip.pypa.io/en/stable/).
 At the command line, type
@@ -43,7 +43,7 @@ At the command line, type
 
 
 Detailed Package Install Instructions
-*************************************
+=====================================
 
 hlmm has the following dependencies:
 
@@ -69,7 +69,7 @@ or, on the windows command prompt, type
     'python setup.py install'
 
 Running tests
-*************
+=============
 
 The tests directory contains scripts for testing the computation of
 the likelihoods, gradients, and maximum likelihood solutions for
