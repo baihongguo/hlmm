@@ -1,49 +1,42 @@
 Introduction
-============
+************
 hlmm is a python library for fitting heteroskedastic linear mixed models to genetic data.
 
-A heteroskedastic linear model (HLM) can model the effect
+A heteroskedastic linear model (:class:`hetlm.model`) can model the effect
 of a set of variables on the mean of a response (such as a continuous phenotype) and the
 effect of a (potentially different) set of variables of the variability of the response
 
-A HLM models all effects on both the mean and variance of a response as fixed effects.
-A heteroskedastic linear mixed model (HLMM) adds modelling of random effects of a set of variables on the mean of the response.
+A :class:`hetlm.model` models all effects on both the mean and variance of a response as fixed effects.
+A heteroskedastic linear mixed model (:class:`hetlmm.model`) adds modelling of random effects of a set of variables on the mean of the response.
 
-Modelling random effects can make fitting a HLMM very computationally demanding,
+Modelling random effects can make fitting a :class:`hetlmm.model` very computationally demanding,
 with the number of operations scaling with the cube of sample size.
 
-The package hlmm provides the ability to fit a HLMM
+The package hlmm provides the ability to fit a :class:`hetlmm.model`
 much more quickly when the number of variables with random effects is small compared
 to the sample size. We use an algorithm whose operations scale in proportion to the sample
 size multiplied by the number of random effects squared.
 
-Find the hlmm documentation at: documentation link here.
+**Main features**
 
-Main features:
-==============
+:class:`hetlm.model`: define heteroskedastic linear models and find maximum likelihood estimates of parameters
 
-HLM class: given data, find the parameters that maximise
-the likelihood and their sampling distribution.
+:class:`hetlmm.model`: define heteroskedastic linear mixed models and find maximum likelihood estimates of parameters
 
-HLMM class: given data, find the parameters that maximise
-the likelihood and their sampling distribution.
-
-hlmm_chr.py: command line script that fits heteroskedastic linear models or
+hlmm_chr.py (:doc:`hlmm_chr`): command line script that fits heteroskedastic linear models or
 heteroskedastic linear mixed models to a contiguous segment of the genome.
 The script takes bed formatted genotypes as input. and can incorporate
 covariates for the fixed effects on the mean and/or variance.
 
-Quick install
-=============
+**Quick install**
 
 We recommend installing using pip (https://pip.pypa.io/en/stable/).
 At the command line, type
 
-    'sudo pip install hlmm'
+    ``sudo pip install hlmm``
 
 
-Detailed Package Install Instructions
-=====================================
+**Detailed Package Install Instructions**
 
 hlmm has the following dependencies:
 
@@ -62,14 +55,13 @@ for optimal speed.
 To install from source, clone the git repository, and in the directory
 containing the HLMM source code, at the shell type
 
-    'sudo python setupy.py install'
+    ``sudo python setupy.py install``
 
 or, on the windows command prompt, type
 
-    'python setup.py install'
+    ``python setup.py install``
 
-Running tests
-=============
+**Running tests**
 
 The tests directory contains scripts for testing the computation of
 the likelihoods, gradients, and maximum likelihood solutions for
@@ -79,7 +71,8 @@ To run these tests, a further dependency is required: numdifftools.
 
 To run the tests, first install hlmm. Change to the tests/ directory and at the shell type
 
-    'python test_hetlm.py'
-    'python test_hetlmm.py'
+    ``python test_hetlm.py``
+
+    ``python test_hetlmm.py``
 
 Both tests should run without any failures.

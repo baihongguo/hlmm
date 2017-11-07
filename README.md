@@ -16,8 +16,6 @@ much more quickly when the number of variables with random effects is small comp
 to the sample size. We use an algorithm whose operations scale in proportion to the sample
 size multiplied by the number of random effects squared. 
 
-Find the hlmm documentation at: documentation link here.
-
 # Main features:
 
 HLM class: given data, find the parameters that maximise

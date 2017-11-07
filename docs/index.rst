@@ -14,6 +14,7 @@ Welcome to hlmm's documentation!
    tutorial
    hetlm
    hetlmm
+   hlmm_chr
 
 Indices and tables
 ==================
