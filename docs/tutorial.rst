@@ -1,6 +1,6 @@
 Tutorial
 ********
-Tutorial on fitting heteroskedastic linear models to genetic data
+Tutorial on fitting heteroskedastic linear models (:class:`hetlm.model`) to genetic data
 
 To run this tutorial, you need plink installed and in your system path. (See http://zzz.bwh.harvard.edu/plink/download.shtml).
 
@@ -28,11 +28,11 @@ The phenotype is simulated so the heritability of the untransformed phenotype is
 
 The script performs inverse-normal transformation of the phenotype before writing the phenotype to file as 'test_phenotype.fam'.
 
-To fit heteroskedastic linear models to the SNPs in test.bed, type
+To fit HLMs (:class:`hetlm.model`) to the SNPs in test.bed, type
 
     ``python ../bin/hlmm_chr.py test.bed 0 500 test_phenotype.fam test``
 
-This produces a file 'test.models.gz' containing the results of fitting heteroskedastic linear models to all the SNPs in test.bed. This is a tab separated file with a header that can be read by R by typing the command
+This produces a file 'test.models.gz' containing the results of fitting HLMs (:class:`hetlm.model`) to all the SNPs in test.bed. This is a tab separated file with a header that can be read by R by typing the command
 
    ``results=read.table('test.models.gz',header=T)``
 
@@ -107,11 +107,11 @@ The other SNPs should not have dispersion effects. To test this, type
 
 The p-value should not be significant. This is contrast to the log-linear variance effect p-value, which should be significant due to the general mean-variance relation.
 
-We have shown how to infer additive, log-linear variance, and dispersion effects using heteroskedastic linear models. We now show how to do the same while taking advantage of the favourable properties of linear mixed models for genetic association testing.
+We have shown how to infer additive, log-linear variance, and dispersion effects using HLMs (:class:`hetlm.model`). We now show how to do the same while taking advantage of the favourable properties of linear mixed models for genetic association testing.
 
 We model random effects for the genotypes in random.bed. All of these SNPs have (relatively weak) additive effects on the trait, so modelling random effects should increase power.
 
-To fit heteroskedastic linear mixed models to all loci in test.bed, at the UNIX terminal, type
+To fit HLMMs (:class:`hetlmm.model`)to all loci in test.bed, at the UNIX terminal, type
 
     ``python ../bin/hlmm_chr.py test.bed 0 500 test_phenotype.fam test_random --random_gts random.bed``
 

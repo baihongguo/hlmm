@@ -7,7 +7,7 @@ Documentation for hlmm_chr.py script
 ====================================
 
 
-This script fits heteroskedastic linear models or heteroskedastic linear mixed models to a sequence of genetic variants
+This script fits heteroskedastic linear models (HLMs) (:class:`hetlm.model`) or heteroskedastic linear mixed models (HLMMs) (:class:`hetlmm.model`) to a sequence of genetic variants
 contained in a .bed file. You need to specify the genotypes.bed file, which also has genotypes.bim and genotypes.fam in
 the same directory, along with the start and end indices of segment you want the script to fit models to.
 
@@ -18,9 +18,9 @@ The phenotype file and covariate file formats are the same: plain text files wit
 column is family ID, and the second column is individual ID; subsequent columns are phenotype or covariate
 observations. This is the same format used by GCTA and FaSTLMM.
 
-If you specify a random_gts.bed file with the option --random_gts, the script will model random effects for
-all of the variants specified in random_gts.bed. If no --random_gts are specified, then heteroskedastic linear
-models are used, without random effects.
+If you specify a random_gts.bed file with the option --random_gts, the script will fit HLMs (:class:`hetlm.model`),
+modelling random effects for the SNPs in random_gts.bed. If no --random_gts are specified, then HLMMs (:class:`hetlmm.model`)
+are used, without random effects.
 
 Minimally, the script will output a file outprefix.models.gz, which contains a table of the additive
 and log-linear variance effects estimated for each variant specified.
@@ -31,21 +31,23 @@ in the null model in outprefix.null_h2.txt. --no_h2_estimate suppresses this out
 If covariates are also specified, it will output estimates of the covariate effects from the null model as
 outprefix.null_mean_effects.txt and outprefix.null_variance_effects.txt. --no_covariate_estimates suppresses this output.
 
+***Arguments***
+
 Required positional arguments:
 
-genofile
+**genofile**
    Path to genotypes in BED format
 
-start
+**start**
    Index of SNP in genofile from which to start computing test stats
 
-end
+**end**
    Index of SNP in genofile at which to finish computing test stats
 
-phenofile
+**phenofile**
    Location of the y file in PLINK format
 
-outprefix
+**outprefix**
    Location to output csv file with association statistics
 
 Options:
@@ -61,7 +63,7 @@ Options:
 
 --random_gts
    Location of the BED file with the genotypes of the SNPs that random effects should be modelled for. If
-   random_gts are provided, heteroskedastic linear mixed models are fit, rather than heteroskedastic linear models.
+   random_gts are provided, HLMMs (:class:`hetlmm.model`) are fit, rather than HLMs (:class:`hetlm.model`).
 
 --h2_init
    Initial value for variance explained by random effects (default 0.05)
@@ -90,3 +92,36 @@ Options:
 
 --no_h2_estimate
     Suppress output of h2 estimate
+
+
+**Example Usage**
+
+We recommend working through the tutorial (:doc:`tutorial`) to learn how to use hlmm_chr.py. We provide some additional
+examples of usage of the script here.
+
+Minimal usage for fitting HLMs (:class:`hetlm.model`):
+
+   ``python hlmm_chr.py genotypes.bed 0 500 phenotype.fam phenotype``
+
+This will fit heteroskedastic linear models to SNPs 0 to 499 in genotypes.bed using the first phenotype in phenotype.fam. It will output
+the results of fitting the models to phenotype.models.gz. See :doc:`tutorial` for a description of the columns
+of phenotypes.models.gz.
+
+Minimal usage for HLMMs (:class:`hetlmm.model`):
+
+   ``python hlmm_chr.py genotypes.bed 0 500 phenotype.fam phenotype --random_gts random.bed``
+
+This will fit heteroskedastic linear mixed models to SNPs 0 to 499 in genotypes.bed using the first phenotype in phenotype.fam. It will output
+the results of fitting the models to phenotype.models.gz. It will also output the estimate of h2, the variance
+of the random effects, to phenotype.null_h2.txt, unless --no_h2_estimate is added to the command.
+
+Fitting covariates:
+
+   ``python hlmm_chr.py genotypes.bed 0 500 phenotype.fam phenotype --mean_covar m_covariates.fam --var_covar v_covariates.fam``
+
+Before fitting locus specific models, the script will first fit a null model including the mean covariates in m_covariates.fam and the variance covariates in v_covariates.fam.
+The script will output the null model estimates of the mean covariates in phenotype.null_mean_effects.txt and
+null model estimates of the variance covariates in phenotypes.null_variance_effects.txt, unless --no_covariate_estimates is added to the command.
+Unless --fit_covariates is added to the command, phenotype is adjusted based on the null model estimates of the mean
+covariate effects and variance covariate effects. The adjusted phenotype is used to fit locus specific models without
+fitting the mean and variance covariates.
