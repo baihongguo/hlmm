@@ -87,11 +87,11 @@ if __name__ == '__main__':
     parser.add_argument('genofile',type=str,help='Path to genotypes in BED format')
     parser.add_argument('start',type=int,help='Index of SNP in genofile from which to start computing test stats')
     parser.add_argument('end',type=int,help='Index of SNP in genofile at which to finish computing test stats')
-    parser.add_argument('phenofile',type=str,help='Location of the y file in PLINK format')
+    parser.add_argument('phenofile',type=str,help='Location of the phenotype file')
     parser.add_argument('outprefix',type=str,help='Location to output csv file with association statistics')
-    parser.add_argument('--mean_covar',type=str,help='Location of mean covariate file in PLINK format (default None)',
+    parser.add_argument('--mean_covar',type=str,help='Location of mean covariate file (default None)',
                         default=None)
-    parser.add_argument('--var_covar',type=str,help='Locaiton of variance covariate file in PLINK format (default None)',
+    parser.add_argument('--var_covar',type=str,help='Location of variance covariate file (default None)',
                         default=None)
     parser.add_argument('--fit_covariates',action='store_true',
                         help='Fit covariates for each locus. Default is to fit for null model and project out (mean) and rescale (variance)',
@@ -99,15 +99,15 @@ if __name__ == '__main__':
     parser.add_argument('--random_gts',type=str,help='Location of the BED file with the genotypes of the SNPs that random effects should be modelled for',default=None)
     parser.add_argument('--h2_init',type=float,help='Initial value for variance explained by random effects (default 0.05)',
                         default=0.05)
-    parser.add_argument('--phen_index',type=int,help='If y file contains multiple ys, which column to choose (default 1, first)',
+    parser.add_argument('--phen_index',type=int,help='If the phenotype file contains multiple phenotypes, which phenotype should be analysed (default 1, first)',
                         default=1)
-    parser.add_argument('--min_maf',type=float,help='Minimum minor allele frequency (default 0.05)',default=0.05)
-    parser.add_argument('--missing_char',type=str,help='Missing value string in y file (default NA)',default='NA')
-    parser.add_argument('--max_missing',type=float,help='Maximum percent of missing genotype calls (default 5)',default=5)
-    parser.add_argument('--append',action='store_true',default=False,help='Append results to existing output file')
+    parser.add_argument('--min_maf',type=float,help='Ignore SNPs with minor allele frequency below min_maf (default 5%)',default=0.05)
+    parser.add_argument('--missing_char',type=str,help='Missing value string in phenotype file (default NA)',default='NA')
+    parser.add_argument('--max_missing',type=float,help='Ignore SNPs with greater % missing calls than max_missing (default 5%)',default=5)
+    parser.add_argument('--append',action='store_true',default=False,help='Append results to existing output file with given outprefix (default overwrites existing')
     parser.add_argument('--whole_chr',action='store_true',default=False,help='Fit models to all variants in .bed genofile')
-    parser.add_argument('--no_covariate_estimates',action='store_true',default=False,help='No output of covariate effect estimates')
-    parser.add_argument('--no_h2_estimate',action='store_true',default=False,help='No output of h2 estimate')
+    parser.add_argument('--no_covariate_estimates',action='store_true',default=False,help='Suppress output of covariate effect estimates')
+    parser.add_argument('--no_h2_estimate',action='store_true',default=False,help='Suppress output of h2 estimate')
 
     args=parser.parse_args()
 
