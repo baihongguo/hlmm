@@ -22,11 +22,12 @@ To simulate the test phenotype, at the command line, type
 
     ``Rscript phenotype_simulation.R``
 
-The phenotype simulation corresponds to the Gamma model described in the paper (link). Briefly, we simulate a Gamma distributed phenotype where every variant from both test.bed and random.bed has an effect on the mean of the trait and also an effect on the variance of the trait through the mean-variance relation of the Gamma distribution. The first variant in test.bed is also given a dispersion effect, and effect on the variance of the trait that cannot be explained by the general mean-variancee relation of the Gamma distribution.
+The phenotype simulation corresponds to the Gamma model described in the paper (link). Briefly, we simulate a Gamma distributed phenotype where every variant from both test.bed and random.bed has an effect on the mean of the trait and also an effect on the variance of the trait through the mean-variance relation of the Gamma distribution.
+The first variant in test.bed is also given a dispersion effect, an effect on the variance of the trait that cannot be explained by the general mean-variance relation of the Gamma distribution.
 
 The phenotype is simulated so the heritability of the untransformed phenotype is 10%, i.e. the mean effects of the genetic variants in test.bed and random.bed explain 10% of the phenotypic variance.
 
-The script performs inverse-normal transformation of the phenotype before writing the phenotype to file as 'test_phenotype.fam'.
+The script performs an inverse-normal transformation of the phenotype before writing the phenotype to file as 'test_phenotype.fam'.
 
 To fit HLMs (:class:`hetlm.model`) to the SNPs in test.bed, type
 
@@ -42,7 +43,7 @@ SNP
  the SNP id from the .bim file
 
 n
- the the sample size used for that SNP
+ the sample size used for that SNP
 
 frequency
  the minor allele frequency of the SNP
@@ -85,7 +86,7 @@ In our simulation, the median of the squared log-linear variance t-statistics wa
 
 There is evidence for inflation of log-linear variance effects because a relationship between the additive and log-linear variance effects exists. This exists because of the mean-variance relation of the Gamma distribution combined with the effects of inverse-normal transformation. To visualise it, type
 
-   ``plot(results$add,result$var,xlab='additive effect',ylab='log-linear variance effect')``
+   ``plot(results$add,results$var,xlab='additive effect',ylab='log-linear variance effect')``
 
 This should produce a plot that looks similar to this:
 
@@ -97,7 +98,7 @@ By inferring the relationship between additive effects and log-linear variance e
 
 We have prepared an R script that estimates dispersion effects and adds them to the results table. To estimate dispersion effects, type
 
-   ``source('estimate_dispersion_effect.R')``
+   ``source('estimate_dispersion_effects.R')``
 
 The first SNP should have a dispersion effect. To see if there is evidence for this, example 'results[1,]', in particular, whether 'dispersion_pval' is large for the first SNP.
 
@@ -105,7 +106,7 @@ The other SNPs should not have dispersion effects. To test this, type
 
     ``ks.test(results$dispersion_t[-1]^2,'pchisq',1)``
 
-The p-value should not be significant. This is contrast to the log-linear variance effect p-value, which should be significant due to the general mean-variance relation.
+The p-value should not be significant. This is in contrast to the log-linear variance effect p-value, which should be significant due to the general mean-variance relation.
 
 We have shown how to infer additive, log-linear variance, and dispersion effects using HLMs (:class:`hetlm.model`). We now show how to do the same while taking advantage of the favourable properties of linear mixed models for genetic association testing.
 

@@ -31,7 +31,7 @@ in the null model in outprefix.null_h2.txt. --no_h2_estimate suppresses this out
 If covariates are also specified, it will output estimates of the covariate effects from the null model as
 outprefix.null_mean_effects.txt and outprefix.null_variance_effects.txt. --no_covariate_estimates suppresses this output.
 
-***Arguments***
+**Arguments**
 
 Required positional arguments:
 
