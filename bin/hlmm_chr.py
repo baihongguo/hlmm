@@ -152,7 +152,7 @@ if __name__ == '__main__':
     pheno_ids=np.array(pheno.iid)
     pheno_id_dict=id_dict_make(pheno_ids)
     geno_in_pheno = np.array([tuple(x) in pheno_id_dict for x in geno_ids])
-    genotype=genotypes[geno_in_pheno,:]
+    genotypes=genotypes[geno_in_pheno,:]
     geno_ids = geno_ids[geno_in_pheno,:]
     pheno_id_match=np.array([pheno_id_dict[tuple(x)] for x in geno_ids])
     y=y[pheno_id_match]
