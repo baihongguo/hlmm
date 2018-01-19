@@ -248,7 +248,8 @@ if __name__ == '__main__':
     alpha_out[:,1]=null_optim['alpha_se']
     # Rescale
     if n_X>1:
-        alpha_out[1:n_X,:] = alpha_out[1:n_X,:]/X_stds
+        for i in xrange(0,2):
+            alpha_out[1:n_X,i] = alpha_out[1:n_X,i]/X_stds
     if not args.append and not args.no_covariate_estimates and args.mean_covar is not None:
         np.savetxt(args.outprefix + '.null_mean_effects.txt',
                    np.hstack((X_names.reshape((n_X, 1)), np.array(alpha_out, dtype='S20'))),
@@ -259,7 +260,8 @@ if __name__ == '__main__':
     beta_out[0:n_V,1]=null_optim['beta_se']
     # Rescale
     if n_V>1:
-        beta_out[1:n_X] = beta_out[1:n_X]/V_stds
+        for i in xrange(0,2):
+            beta_out[1:n_X,i] = beta_out[1:n_X,i]/V_stds
     if not args.append and not args.no_covariate_estimates and args.var_covar is not None:
         np.savetxt(args.outprefix + '.null_variance_effects.txt',
                    np.hstack((V_names.reshape((n_V, 1)), np.array(beta_out, dtype='S20'))),
