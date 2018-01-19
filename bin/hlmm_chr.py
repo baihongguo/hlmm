@@ -248,7 +248,7 @@ if __name__ == '__main__':
     alpha_out[:,1]=null_optim['alpha_se']
     # Rescale
     if n_X>1:
-        alpha_out[1:n_X] = alpha_out[1:n_X]/X_stds
+        alpha_out[1:n_X,:] = alpha_out[1:n_X,:]/X_stds
     if not args.append and not args.no_covariate_estimates and args.mean_covar is not None:
         np.savetxt(args.outprefix + '.null_mean_effects.txt',
                    np.hstack((X_names.reshape((n_X, 1)), np.array(alpha_out, dtype='S20'))),
