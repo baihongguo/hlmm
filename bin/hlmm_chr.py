@@ -89,6 +89,7 @@ if __name__ == '__main__':
     parser.add_argument('end',type=int,help='Index of SNP in genofile at which to finish computing test stats')
     parser.add_argument('phenofile',type=str,help='Location of the phenotype file')
     parser.add_argument('outprefix',type=str,help='Location to output csv file with association statistics')
+    parser.add_argument('--fam',type=str,help='Location of FAM file for genotypes if different from BED file name',default=None)
     parser.add_argument('--mean_covar',type=str,help='Location of mean covariate file (default None)',
                         default=None)
     parser.add_argument('--var_covar',type=str,help='Location of variance covariate file (default None)',
@@ -113,7 +114,12 @@ if __name__ == '__main__':
 
     ####################### Read in data #########################
     ### Read genotypes ###
-    test_chr=Bed(args.genofile)
+    if args.fam is not None:
+        fam = np.loadtxt(args.fam,dtype='S20')
+        fam = fam[:,0:2]
+        test_chr = Bed(args.genofile,iid = fam)
+    else:
+        test_chr=Bed(args.genofile)
     # select subset to test
     if args.whole_chr:
         sid = test_chr.sid
