@@ -130,7 +130,42 @@ if __name__ == '__main__':
         chr_length=genotypes.shape[1]
     print('Number of test loci: '+str(genotypes.shape[1]))
     # Get sample ids
-    geno_ids=test_chr.iid
+    geno_ids=np.array(test_chr.iid)
+    geno_id_dict = id_dict_make(geno_ids)
+
+    #### Read random effect genotypes ####
+    if args.random_gts is not None:
+        random_gts_f=Bed(args.random_gts)
+        random_gts_ids = np.array(random_gts_f.iid)
+        random_gts_f=random_gts_f.read()
+        # Match to genotypes
+        G_random=random_gts_f.val
+        G = np.empty((genotypes.shape[0],G_random.shape[1]))
+        G[:]=np.nan
+        for i in xrange(0,random_gts_ids.shape[0]):
+            if tuple(random_gts_ids[i,:]) in geno_id_dict:
+                G[geno_id_dict[tuple(random_gts_ids[i,:])],:]=G_random[i,:]
+        del G_random
+        # Check for NAs
+        random_isnan=np.isnan(G)
+        random_gts_NAs=np.sum(random_isnan,axis=0)
+        gts_with_obs=list()
+        if np.sum(random_gts_NAs)>0:
+            print('Mean imputing missing genotypes in random effect design matrix')
+            for i in xrange(0,G.shape[1]):
+                if random_gts_NAs[i]<G.shape[0]:
+                    gts_with_obs.append(i)
+                    if random_gts_NAs[i]>0:
+                        gt_mean=np.mean(G[np.logical_not(random_isnan[:,i]),i])
+                        G[random_isnan[:,i],i]=gt_mean
+            # Keep only columns with observations
+            G=G[:,gts_with_obs]
+        G = zscore(G, axis=0)
+        # Rescale random effect design matrix
+        G = np.power(G.shape[1], -0.5) * G
+        print(str(int(G.shape[1]))+' loci in random effect')
+    else:
+        G = None
 
     #### Read phenotype ###
     pheno=Pheno(args.phenofile,iid_if_none=geno_ids,missing=args.missing_char).read()
@@ -153,6 +188,7 @@ if __name__ == '__main__':
         y=y[y_not_nan]
         # Remove NAs from genotypes
         genotypes=genotypes[y_not_nan,:]
+        G = G[y_not_nan,:]
     # Get sample size
     n=genotypes.shape[0]
     print(str(n)+' non missing cases from phenotype')
@@ -187,31 +223,6 @@ if __name__ == '__main__':
         V_names=np.array(['Intercept'])
     n_pars=n_X+n_V+1
     print(str(n_pars)+' parameters in model')
-
-    #### Read random effect genotypes ####
-    if args.random_gts is not None:
-        random_gts_f=Bed(args.random_gts).read()
-        G=random_gts_f.val
-        # Check for NAs
-        random_isnan=np.isnan(G)
-        random_gts_NAs=np.sum(random_isnan,axis=0)
-        gts_with_obs=list()
-        if np.sum(random_gts_NAs)>0:
-            print('Mean imputing missing genotypes in random effect design matrix')
-            for i in xrange(0,G.shape[1]):
-                if random_gts_NAs[i]<G.shape[0]:
-                    gts_with_obs.append(i)
-                    if random_gts_NAs[i]>0:
-                        gt_mean=np.mean(G[np.logical_not(random_isnan[:,i]),i])
-                        G[random_isnan[:,i],i]=gt_mean
-            # Keep only columns with observations
-            G=G[:,gts_with_obs]
-        G = zscore(G, axis=0)
-        # Rescale random effect design matrix
-        G = np.power(G.shape[1], -0.5) * G
-        print(str(int(G.shape[1]))+' loci in random effect')
-    else:
-        G = None
 
     ######### Initialise output files #######
     ## Output file
