@@ -89,6 +89,7 @@ if __name__ == '__main__':
     parser.add_argument('end',type=int,help='Index of SNP in genofile at which to finish computing test stats')
     parser.add_argument('phenofile',type=str,help='Location of the phenotype file')
     parser.add_argument('outprefix',type=str,help='Location to output csv file with association statistics')
+    parser.add_argument('--fam',type=str,help='Location of FAM file for genotypes if different from BED file name',default=None)
     parser.add_argument('--mean_covar',type=str,help='Location of mean covariate file (default None)',
                         default=None)
     parser.add_argument('--var_covar',type=str,help='Location of variance covariate file (default None)',
@@ -101,9 +102,9 @@ if __name__ == '__main__':
                         default=0.05)
     parser.add_argument('--phen_index',type=int,help='If the phenotype file contains multiple phenotypes, which phenotype should be analysed (default 1, first)',
                         default=1)
-    parser.add_argument('--min_maf',type=float,help='Ignore SNPs with minor allele frequency below min_maf (default 5%)',default=0.05)
+    parser.add_argument('--min_maf',type=float,help='Ignore SNPs with minor allele frequency below min_maf (default 0.05)',default=0.05)
     parser.add_argument('--missing_char',type=str,help='Missing value string in phenotype file (default NA)',default='NA')
-    parser.add_argument('--max_missing',type=float,help='Ignore SNPs with greater % missing calls than max_missing (default 5%)',default=5)
+    parser.add_argument('--max_missing',type=float,help='Ignore SNPs with greater percent missing calls than max_missing (default 5)',default=5)
     parser.add_argument('--append',action='store_true',default=False,help='Append results to existing output file with given outprefix (default overwrites existing')
     parser.add_argument('--whole_chr',action='store_true',default=False,help='Fit models to all variants in .bed genofile')
     parser.add_argument('--no_covariate_estimates',action='store_true',default=False,help='Suppress output of covariate effect estimates')
@@ -113,7 +114,12 @@ if __name__ == '__main__':
 
     ####################### Read in data #########################
     ### Read genotypes ###
-    test_chr=Bed(args.genofile)
+    if args.fam is not None:
+        fam = np.loadtxt(args.fam,dtype='S20')
+        fam = fam[:,0:2]
+        test_chr = Bed(args.genofile,iid = fam)
+    else:
+        test_chr=Bed(args.genofile)
     # select subset to test
     if args.whole_chr:
         sid = test_chr.sid
@@ -180,6 +186,9 @@ if __name__ == '__main__':
     # Match IDs with geno IDs
     pheno_ids=np.array(pheno.iid)
     pheno_id_dict=id_dict_make(pheno_ids)
+    geno_in_pheno = np.array([tuple(x) in pheno_id_dict for x in geno_ids])
+    genotypes=genotypes[geno_in_pheno,:]
+    geno_ids = geno_ids[geno_in_pheno,:]
     pheno_id_match=np.array([pheno_id_dict[tuple(x)] for x in geno_ids])
     y=y[pheno_id_match]
     # Remove y NAs
@@ -250,7 +259,8 @@ if __name__ == '__main__':
     alpha_out[:,1]=null_optim['alpha_se']
     # Rescale
     if n_X>1:
-        alpha_out[1:n_X] = alpha_out[1:n_X]/X_stds
+        for i in xrange(0,2):
+            alpha_out[1:n_X,i] = alpha_out[1:n_X,i]/X_stds
     if not args.append and not args.no_covariate_estimates and args.mean_covar is not None:
         np.savetxt(args.outprefix + '.null_mean_effects.txt',
                    np.hstack((X_names.reshape((n_X, 1)), np.array(alpha_out, dtype='S20'))),
@@ -261,7 +271,8 @@ if __name__ == '__main__':
     beta_out[0:n_V,1]=null_optim['beta_se']
     # Rescale
     if n_V>1:
-        beta_out[1:n_X] = beta_out[1:n_X]/V_stds
+        for i in xrange(0,2):
+            beta_out[1:n_X,i] = beta_out[1:n_X,i]/V_stds
     if not args.append and not args.no_covariate_estimates and args.var_covar is not None:
         np.savetxt(args.outprefix + '.null_variance_effects.txt',
                    np.hstack((V_names.reshape((n_V, 1)), np.array(beta_out, dtype='S20'))),
