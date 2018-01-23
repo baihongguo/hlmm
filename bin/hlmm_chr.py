@@ -165,7 +165,8 @@ if __name__ == '__main__':
                         gt_mean=np.mean(G[np.logical_not(random_isnan[:,i]),i])
                         G[random_isnan[:,i],i]=gt_mean
             # Keep only columns with observations
-            G=G[:,gts_with_obs]
+            if len(gts_with_obs)<G.shape[1]:
+                G=G[:,gts_with_obs]
         G = zscore(G, axis=0)
         # Rescale random effect design matrix
         G = np.power(G.shape[1], -0.5) * G
@@ -187,7 +188,9 @@ if __name__ == '__main__':
     pheno_ids=np.array(pheno.iid)
     pheno_id_dict=id_dict_make(pheno_ids)
     geno_in_pheno = np.array([tuple(x) in pheno_id_dict for x in geno_ids])
+    print(str(np.sum(geno_in_pheno))+' individuals shared between genotype and phenotype data')
     genotypes=genotypes[geno_in_pheno,:]
+    G = G[geno_in_pheno,:]
     geno_ids = geno_ids[geno_in_pheno,:]
     pheno_id_match=np.array([pheno_id_dict[tuple(x)] for x in geno_ids])
     y=y[pheno_id_match]
@@ -197,9 +200,12 @@ if __name__ == '__main__':
         y=y[y_not_nan]
         # Remove NAs from genotypes
         genotypes=genotypes[y_not_nan,:]
-        G = G[y_not_nan,:]
+        if G is not None:
+            G = G[y_not_nan,:]
     # Get sample size
     n=genotypes.shape[0]
+    if n==0:
+        raise(ValueError('No non-missing observations with both phenotype and genotype data'))
     print(str(n)+' non missing cases from phenotype')
     n=float(n)
 
