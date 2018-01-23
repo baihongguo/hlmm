@@ -255,19 +255,6 @@ if __name__ == '__main__':
     print('Fitting Null Model')
     # Optimize null model
     null_optim= hetlm.model(y, X, V).optimize_model()
-    ### Project out mean covariates and rescale if not fitting for each locus
-    if not args.fit_covariates:
-        # Residual y
-        y=y-X.dot(null_optim['alpha'])
-        # Reformulate fixed_effects
-        X=np.ones((int(n),1))
-        n_X=1
-        # Rescaled residual y
-        D_null_sqrt=np.exp(0.5*V.dot(null_optim['beta']))
-        y=y/D_null_sqrt
-        # Reformulate fixed variance effects
-        V=np.ones((int(n),1))
-        n_V=1
 
     ## Record fitting of null model
     # Get print out for fixed mean effects
@@ -294,6 +281,21 @@ if __name__ == '__main__':
         np.savetxt(args.outprefix + '.null_variance_effects.txt',
                    np.hstack((V_names.reshape((n_V, 1)), np.array(beta_out, dtype='S20'))),
                    delimiter='\t', fmt='%s')
+
+    ### Project out mean covariates and rescale if not fitting for each locus
+    if not args.fit_covariates:
+        # Residual y
+        y=y-X.dot(null_optim['alpha'])
+        # Reformulate fixed_effects
+        X=np.ones((int(n),1))
+        n_X=1
+        # Rescaled residual y
+        D_null_sqrt=np.exp(0.5*V.dot(null_optim['beta']))
+        y=y/D_null_sqrt
+        # Reformulate fixed variance effects
+        V=np.ones((int(n),1))
+        n_V=1
+
     # h2
     if G is not None:
         null_optim = hetlmm.model(y, X, V, G).optimize_model(args.h2_init)
