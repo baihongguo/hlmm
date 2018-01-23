@@ -206,7 +206,7 @@ if __name__ == '__main__':
     n=genotypes.shape[0]
     if n==0:
         raise(ValueError('No non-missing observations with both phenotype and genotype data'))
-    print(str(n)+' non missing cases from phenotype')
+    print(str(n)+' non missing cases with both phenotype and genotype data')
     n=float(n)
 
     ### Get covariates
@@ -254,10 +254,21 @@ if __name__ == '__main__':
     ## Get initial guesses for null model
     print('Fitting Null Model')
     # Optimize null model
-    if G is not None:
-        null_optim= hetlmm.model(y, X, V, G).optimize_model(args.h2_init)
-    else:
-        null_optim= hetlm.model(y, X, V).optimize_model()
+    null_optim= hetlm.model(y, X, V).optimize_model()
+    ### Project out mean covariates and rescale if not fitting for each locus
+    if not args.fit_covariates:
+        # Residual y
+        y=y-X.dot(null_optim['alpha'])
+        # Reformulate fixed_effects
+        X=np.ones((int(n),1))
+        n_X=1
+        # Rescaled residual y
+        D_null_sqrt=np.exp(0.5*V.dot(null_optim['beta']))
+        y=y/D_null_sqrt
+        # Reformulate fixed variance effects
+        V=np.ones((int(n),1))
+        n_V=1
+
     ## Record fitting of null model
     # Get print out for fixed mean effects
     alpha_out=np.zeros((n_X,2))
@@ -285,24 +296,13 @@ if __name__ == '__main__':
                    delimiter='\t', fmt='%s')
     # h2
     if G is not None:
+        null_optim = hetlmm.model(y, X, V, G).optimize_model(args.h2_init)
         if not args.append and not args.no_h2_estimate:
             np.savetxt(args.outprefix + '.null_h2.txt',
                        np.array([null_optim['h2'], null_optim['h2_se']], dtype='S20'),
                        delimiter='\t', fmt='%s')
 
-    ### Project out mean covariates and rescale if not fitting for each locus
-    if not args.fit_covariates:
-        # Residual y
-        y=y-X.dot(null_optim['alpha'])
-        # Reformulate fixed_effects
-        X=np.ones((int(n),1))
-        n_X=1
-        # Rescaled residual y
-        D_null_sqrt=np.exp(0.5*V.dot(null_optim['beta']))
-        y=y/D_null_sqrt
-        # Reformulate fixed variance effects
-        V=np.ones((int(n),1))
-        n_V=1
+
 
     ############### Loop through loci and fit AV models ######################
     print('Fitting models for specified loci')
