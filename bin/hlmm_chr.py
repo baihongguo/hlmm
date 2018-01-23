@@ -304,8 +304,6 @@ if __name__ == '__main__':
                        np.array([null_optim['h2'], null_optim['h2_se']], dtype='S20'),
                        delimiter='\t', fmt='%s')
 
-
-
     ############### Loop through loci and fit AV models ######################
     print('Fitting models for specified loci')
     for loc in xrange(0,chr_length):
