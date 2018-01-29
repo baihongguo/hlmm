@@ -190,7 +190,8 @@ if __name__ == '__main__':
     geno_in_pheno = np.array([tuple(x) in pheno_id_dict for x in geno_ids])
     print(str(np.sum(geno_in_pheno))+' individuals shared between genotype and phenotype data')
     genotypes=genotypes[geno_in_pheno,:]
-    G = G[geno_in_pheno,:]
+    if G is not None:
+        G = G[geno_in_pheno,:]
     geno_ids = geno_ids[geno_in_pheno,:]
     pheno_id_match=np.array([pheno_id_dict[tuple(x)] for x in geno_ids])
     y=y[pheno_id_match]
