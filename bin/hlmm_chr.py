@@ -67,6 +67,7 @@ def read_covariates(covar_file,ids_to_match,missing):
 ## Read a covariate file and reorder to match ids_to_match ##
     # Read covariate file
     covar_f = Pheno(covar_file, missing=missing).read()
+    ids = covar_f.iid
     # Get covariate values
     n_X=covar_f._col.shape[0]+1
     X=np.ones((covar_f.val.shape[0],n_X))
@@ -75,11 +76,21 @@ def read_covariates(covar_file,ids_to_match,missing):
     X_names = np.zeros((n_X), dtype='S10')
     X_names[0] = 'Intercept'
     X_names[1:n_X] = np.array(covar_f._col, dtype='S20')
-    # Match with geno_ids
-    ids_dict = id_dict_make(np.array(covar_f.iid))
-    X_id_match = np.array([ids_dict[tuple(x)] for x in ids_to_match])
+    # Remove NAs
+    NA_rows = np.isnan(X).any(axis=1)
+    n_NA_row = np.sum(NA_rows)
+    if n_NA_row>0:
+        print('Number of rows removed from covariate file due to missing observations: '+str(np.sum(NA_rows)))
+        X = X[~NA_rows]
+        ids = ids[~NA_rows]
+    id_dict = id_dict_make(ids)
+    # Match with pheno_ids
+    common_ids = id_dict.viewkeys() & set(ids_to_match)
+    pheno_in = [(x in common_ids) for x in ids_to_match]
+    match_ids = ids_to_match[pheno_in]
+    X_id_match = np.array([id_dict[tuple(x)] for x in match_ids])
     X = X[X_id_match, :]
-    return [X,X_names]
+    return [X,X_names,pheno_in]
 
 ######### Command line arguments #########
 if __name__ == '__main__':
@@ -89,7 +100,6 @@ if __name__ == '__main__':
     parser.add_argument('end',type=int,help='Index of SNP in genofile at which to finish computing test stats')
     parser.add_argument('phenofile',type=str,help='Location of the phenotype file')
     parser.add_argument('outprefix',type=str,help='Location to output csv file with association statistics')
-    parser.add_argument('--fam',type=str,help='Location of FAM file for genotypes if different from BED file name',default=None)
     parser.add_argument('--mean_covar',type=str,help='Location of mean covariate file (default None)',
                         default=None)
     parser.add_argument('--var_covar',type=str,help='Location of variance covariate file (default None)',
@@ -113,13 +123,60 @@ if __name__ == '__main__':
     args=parser.parse_args()
 
     ####################### Read in data #########################
-    ### Read genotypes ###
-    if args.fam is not None:
-        fam = np.loadtxt(args.fam,dtype='S20')
-        fam = fam[:,0:2]
-        test_chr = Bed(args.genofile,iid = fam)
+    #### Read phenotype ###
+    pheno = Pheno(args.phenofile, missing=args.missing_char).read()
+    y = np.array(pheno.val)
+    pheno_ids = np.array(pheno.iid)
+    if y.ndim == 1:
+        pass
+    elif y.ndim == 2:
+        y = y[:, args.phen_index - 1]
     else:
-        test_chr=Bed(args.genofile)
+        raise (ValueError('Incorrect dimensions of phenotype array'))
+    # Remove y NAs
+    y_not_nan = np.logical_not(np.isnan(y))
+    if np.sum(y_not_nan) < y.shape[0]:
+        y = y[y_not_nan]
+        pheno_ids = pheno_ids[y_not_nan,:]
+    # Make id dictionary
+    print('Number of non-missing y observations: ' + str(y.shape[0]))
+
+    ### Get covariates
+    ## Get mean covariates
+    if not args.mean_covar == None:
+        X, X_names, pheno_in = read_covariates(args.mean_covar,pheno_ids, args.missing_char)
+        n_X = X.shape[1]
+        # Remove rows with missing values
+        if np.sum(pheno_in) < y.shape[0]:
+            y = y[pheno_in]
+            pheno_ids = pheno_ids[pheno_in,:]
+        # Normalise non-constant cols
+        X_stds = np.std(X[:, 1:n_X], axis=0)
+        X[:, 1:n_X] = zscore(X[:, 1:n_X], axis=0)
+    else:
+        X = np.ones((int(y.shape[0]), 1))
+        n_X = 1
+        X_names = np.array(['Intercept'])
+    ## Get variance covariates
+    if not args.var_covar == None:
+        V, V_names = read_covariates(args.var_covar,pheno_ids, args.missing_char)
+        n_V = V.shape[1]
+        # Remove rows with missing values
+        if np.sum(pheno_in) < y.shape[0]:
+            y = y[pheno_in]
+            pheno_ids = pheno_ids[pheno_in,:]
+        # Normalise non-constant cols
+        V_stds = np.std(V[:, 1:n_V], axis=0)
+        V[:, 1:n_V] = zscore(V[:, 1:n_V], axis=0)
+    else:
+        V = np.ones((int(y.shape[0]), 1))
+        n_V = 1
+        V_names = np.array(['Intercept'])
+    n_pars = n_X + n_V + 1
+    print(str(n_pars) + ' parameters in model')
+
+    ### Read genotypes ###
+    test_chr = Bed(args.genofile)
     # select subset to test
     if args.whole_chr:
         sid = test_chr.sid
@@ -127,118 +184,69 @@ if __name__ == '__main__':
     else:
         sid = test_chr.sid[args.start:args.end]
         test_chr = test_chr[:, args.start:args.end].read()
-    genotypes=test_chr.val
+    genotypes = test_chr.val
     # Get genotype matrix
-    if genotypes.ndim==1:
-        chr_length=1
-        genotypes=genotypes.reshape(genotypes.shape[0],1)
+    if genotypes.ndim == 1:
+        chr_length = 1
+        genotypes = genotypes.reshape(genotypes.shape[0], 1)
     else:
-        chr_length=genotypes.shape[1]
-    print('Number of test loci: '+str(genotypes.shape[1]))
+        chr_length = genotypes.shape[1]
+    print('Number of test loci: ' + str(genotypes.shape[1]))
+    print('Genotypes for '+str(genotypes.shape[0])+' individuals read')
     # Get sample ids
-    geno_ids=np.array(test_chr.iid)
-    geno_id_dict = id_dict_make(geno_ids)
+    geno_id_dict = id_dict_make(np.array(test_chr.iid))
+    # Intersect with phenotype IDs
+    ids_in_common = set(pheno_ids) & geno_id_dict.viewkeys()
+    pheno_ids_in_common = [x in ids_in_common for x in pheno_ids]
+    y = y[pheno_ids_in_common]
+    pheno_ids = pheno_ids[pheno_ids_in_common,:]
+    pheno_id_dict = id_dict_make(pheno_ids)
+    X = X[pheno_ids_in_common,:]
+    V = V[pheno_ids_in_common,:]
+    geno_id_match = np.array([geno_id_dict[tuple(x)] for x in pheno_ids])
+    genotypes = genotypes[geno_id_match, :]
+
+    # Get sample size
+    n = genotypes.shape[0]
+    if n == 0:
+        raise (ValueError('No non-missing observations with both phenotype and genotype data'))
+    print(str(n) + ' individuals in genotype file with no missing phenotype or covariate observations')
+    n = float(n)
 
     #### Read random effect genotypes ####
     if args.random_gts is not None:
-        random_gts_f=Bed(args.random_gts)
+        random_gts_f = Bed(args.random_gts)
         random_gts_ids = np.array(random_gts_f.iid)
-        random_gts_f=random_gts_f.read()
-        # Match to genotypes
-        G_random=random_gts_f.val
-        G = np.empty((genotypes.shape[0],G_random.shape[1]))
-        G[:]=np.nan
-        for i in xrange(0,random_gts_ids.shape[0]):
-            if tuple(random_gts_ids[i,:]) in geno_id_dict:
-                G[geno_id_dict[tuple(random_gts_ids[i,:])],:]=G_random[i,:]
+        random_gts_f = random_gts_f.read()
+        # Match to phenotypes
+        G_random = random_gts_f.val
+        G = np.empty((genotypes.shape[0], G_random.shape[1]))
+        G[:] = np.nan
+        for i in xrange(0, random_gts_ids.shape[0]):
+            if tuple(random_gts_ids[i, :]) in pheno_id_dict:
+                G[pheno_id_dict[tuple(random_gts_ids[i, :])], :] = G_random[i, :]
         del G_random
         # Check for NAs
-        random_isnan=np.isnan(G)
-        random_gts_NAs=np.sum(random_isnan,axis=0)
-        gts_with_obs=list()
-        if np.sum(random_gts_NAs)>0:
+        random_isnan = np.isnan(G)
+        random_gts_NAs = np.sum(random_isnan, axis=0)
+        gts_with_obs = list()
+        if np.sum(random_gts_NAs) > 0:
             print('Mean imputing missing genotypes in random effect design matrix')
-            for i in xrange(0,G.shape[1]):
-                if random_gts_NAs[i]<G.shape[0]:
+            for i in xrange(0, G.shape[1]):
+                if random_gts_NAs[i] < G.shape[0]:
                     gts_with_obs.append(i)
-                    if random_gts_NAs[i]>0:
-                        gt_mean=np.mean(G[np.logical_not(random_isnan[:,i]),i])
-                        G[random_isnan[:,i],i]=gt_mean
+                    if random_gts_NAs[i] > 0:
+                        gt_mean = np.mean(G[np.logical_not(random_isnan[:, i]), i])
+                        G[random_isnan[:, i], i] = gt_mean
             # Keep only columns with observations
-            if len(gts_with_obs)<G.shape[1]:
-                G=G[:,gts_with_obs]
+            if len(gts_with_obs) < G.shape[1]:
+                G = G[:, gts_with_obs]
         G = zscore(G, axis=0)
         # Rescale random effect design matrix
         G = np.power(G.shape[1], -0.5) * G
-        print(str(int(G.shape[1]))+' loci in random effect')
+        print(str(int(G.shape[1])) + ' loci in random effect')
     else:
         G = None
-
-    #### Read phenotype ###
-    pheno=Pheno(args.phenofile,iid_if_none=geno_ids,missing=args.missing_char).read()
-    y=np.array(pheno.val)
-    if y.ndim==1:
-        pass
-    elif y.ndim==2:
-        y=y[:,args.phen_index-1]
-    else:
-        raise(ValueError('Incorrect dimensions of phenotype array'))
-    print('Number of y observations: '+str(y.shape[0]))
-    # Match IDs with geno IDs
-    pheno_ids=np.array(pheno.iid)
-    pheno_id_dict=id_dict_make(pheno_ids)
-    geno_in_pheno = np.array([tuple(x) in pheno_id_dict for x in geno_ids])
-    print(str(np.sum(geno_in_pheno))+' individuals shared between genotype and phenotype data')
-    genotypes=genotypes[geno_in_pheno,:]
-    if G is not None:
-        G = G[geno_in_pheno,:]
-    geno_ids = geno_ids[geno_in_pheno,:]
-    pheno_id_match=np.array([pheno_id_dict[tuple(x)] for x in geno_ids])
-    y=y[pheno_id_match]
-    # Remove y NAs
-    y_not_nan=np.logical_not(np.isnan(y))
-    if np.sum(y_not_nan)<y.shape[0]:
-        y=y[y_not_nan]
-        # Remove NAs from genotypes
-        genotypes=genotypes[y_not_nan,:]
-        if G is not None:
-            G = G[y_not_nan,:]
-    # Get sample size
-    n=genotypes.shape[0]
-    if n==0:
-        raise(ValueError('No non-missing observations with both phenotype and genotype data'))
-    print(str(n)+' non missing cases with both phenotype and genotype data')
-    n=float(n)
-
-    ### Get covariates
-    ## Get mean covariates
-    if not args.mean_covar==None:
-        X, X_names = read_covariates(args.mean_covar,geno_ids,args.missing_char)
-        n_X=X.shape[1]
-        # Remove rows with missing values
-        X=X[y_not_nan,:]
-        # Normalise non-constant cols
-        X_stds = np.std(X[:,1:n_X],axis=0)
-        X[:,1:n_X]=zscore(X[:,1:n_X],axis=0)
-    else:
-        X=np.ones((int(n),1))
-        n_X=1
-        X_names=np.array(['Intercept'])
-    ## Get variance covariates
-    if not args.var_covar==None:
-        V, V_names = read_covariates(args.var_covar,geno_ids,args.missing_char)
-        n_V=V.shape[1]
-        # Remove rows with missing values
-        V=V[y_not_nan,:]
-        # Normalise non-constant cols
-        V_stds = np.std(V[:, 1:n_V], axis=0)
-        V[:,1:n_V]=zscore(V[:,1:n_V],axis=0)
-    else:
-        V=np.ones((int(n),1))
-        n_V=1
-        V_names=np.array(['Intercept'])
-    n_pars=n_X+n_V+1
-    print(str(n_pars)+' parameters in model')
 
     ######### Initialise output files #######
     ## Output file
