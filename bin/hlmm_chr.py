@@ -85,9 +85,10 @@ def read_covariates(covar_file,ids_to_match,missing):
         ids = ids[~NA_rows]
     id_dict = id_dict_make(ids)
     # Match with pheno_ids
-    common_ids = id_dict.viewkeys() & set(ids_to_match)
-    pheno_in = [(x in common_ids) for x in ids_to_match]
-    match_ids = ids_to_match[pheno_in]
+    ids_to_match_tuples = [tuple(x) for x in ids_to_match]
+    common_ids = id_dict.viewkeys() & set(ids_to_match_tuples)
+    pheno_in = np.array([(tuple(x) in common_ids) for x in ids_to_match])
+    match_ids = ids_to_match[pheno_in,:]
     X_id_match = np.array([id_dict[tuple(x)] for x in match_ids])
     X = X[X_id_match, :]
     return [X,X_names,pheno_in]
@@ -159,7 +160,7 @@ if __name__ == '__main__':
         X_names = np.array(['Intercept'])
     ## Get variance covariates
     if not args.var_covar == None:
-        V, V_names = read_covariates(args.var_covar,pheno_ids, args.missing_char)
+        V, V_names, pheno_in = read_covariates(args.var_covar,pheno_ids, args.missing_char)
         n_V = V.shape[1]
         # Remove rows with missing values
         if np.sum(pheno_in) < y.shape[0]:
@@ -196,8 +197,8 @@ if __name__ == '__main__':
     # Get sample ids
     geno_id_dict = id_dict_make(np.array(test_chr.iid))
     # Intersect with phenotype IDs
-    ids_in_common = set(pheno_ids) & geno_id_dict.viewkeys()
-    pheno_ids_in_common = [x in ids_in_common for x in pheno_ids]
+    ids_in_common = {tuple(x) for x in pheno_ids} & geno_id_dict.viewkeys()
+    pheno_ids_in_common = np.array([tuple(x) in ids_in_common for x in pheno_ids])
     y = y[pheno_ids_in_common]
     pheno_ids = pheno_ids[pheno_ids_in_common,:]
     pheno_id_dict = id_dict_make(pheno_ids)

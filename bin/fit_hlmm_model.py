@@ -85,9 +85,10 @@ def read_covariates(covar_file,ids_to_match,missing):
         ids = ids[~NA_rows]
     id_dict = id_dict_make(ids)
     # Match with pheno_ids
-    common_ids = id_dict.viewkeys() & set(ids_to_match)
-    pheno_in = [(x in common_ids) for x in ids_to_match]
-    match_ids = ids_to_match[pheno_in]
+    ids_to_match_tuples = [tuple(x) for x in ids_to_match]
+    common_ids = id_dict.viewkeys() & set(ids_to_match_tuples)
+    pheno_in = np.array([(tuple(x) in common_ids) for x in ids_to_match])
+    match_ids = ids_to_match[pheno_in,:]
     X_id_match = np.array([id_dict[tuple(x)] for x in match_ids])
     X = X[X_id_match, :]
     return [X,X_names,pheno_in]
@@ -130,7 +131,6 @@ if __name__ == '__main__':
     # Make id dictionary
     print('Number of non-missing y observations: ' + str(y.shape[0]))
 
-    ### Get covariates
     ## Get mean covariates
     if not args.mean_covar == None:
         X, X_names, pheno_in = read_covariates(args.mean_covar,pheno_ids, args.missing_char)
@@ -148,7 +148,7 @@ if __name__ == '__main__':
         X_names = np.array(['Intercept'])
     ## Get variance covariates
     if not args.var_covar == None:
-        V, V_names = read_covariates(args.var_covar,pheno_ids, args.missing_char)
+        V, V_names, pheno_in = read_covariates(args.var_covar,pheno_ids, args.missing_char)
         n_V = V.shape[1]
         # Remove rows with missing values
         if np.sum(pheno_in) < y.shape[0]:
