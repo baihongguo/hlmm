@@ -212,7 +212,7 @@ if __name__ == '__main__':
     print('Fitting Model')
     # Optimize null model
     if G is not None:
-        optim= hetlmm.model(y, X, V, G).optimize_model()
+        optim= hetlmm.model(y, X, V, G).optimize_model(args.h2_init)
         # Save h2 estimate
         if not args.no_h2_estimate:
             np.savetxt(args.outprefix + '.h2.txt',
