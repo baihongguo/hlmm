@@ -311,22 +311,22 @@ if __name__ == '__main__':
         V=np.ones((int(n),1))
         n_V=1
 
-    # h2
-    if G is not None:
-        null_optim = hetlmm.model(y, X, V, G).optimize_model(args.h2_init)
-        if not args.append and not args.no_h2_estimate:
-            np.savetxt(args.outprefix + '.null_h2.txt',
-                       np.array([null_optim['h2'], null_optim['h2_se']], dtype='S20'),
-                       delimiter='\t', fmt='%s')
-
-    ############### Loop through loci and fit AV models ######################
-    print('Fitting models for specified loci')
     # Initialise h2
     if G is not None:
         if args.no_h2_estimate:
             h2_init = args.h2_init
         else:
+            print('Estimating h2 in null model')
+            null_optim = hetlmm.model(y, X, V, G).optimize_model(args.h2_init)
             h2_init = null_optim['h2']
+            # Save null h2 estimate
+            if not args.append:
+                np.savetxt(args.outprefix + '.null_h2.txt',
+                           np.array([null_optim['h2'], null_optim['h2_se']], dtype='S20'),
+                           delimiter='\t', fmt='%s')
+
+    ############### Loop through loci and fit AV models ######################
+    print('Fitting models for specified loci')
     for loc in xrange(0,chr_length):
         # Filler for output if locus doesn't pass thresholds
         additive_av_out='NaN\tNaN\tNaN\tNaN'
