@@ -321,6 +321,12 @@ if __name__ == '__main__':
 
     ############### Loop through loci and fit AV models ######################
     print('Fitting models for specified loci')
+    # Initialise h2
+    if G is not None:
+        if args.no_h2_estimate:
+            h2_init = args.h2_init
+        else:
+            h2_init = null_optim['h2']
     for loc in xrange(0,chr_length):
         # Filler for output if locus doesn't pass thresholds
         additive_av_out='NaN\tNaN\tNaN\tNaN'
@@ -354,7 +360,8 @@ if __name__ == '__main__':
                 print('Fitting AV model for locus '+str(loc))
                 if G is not None:
                     G_l = G[test_gt_not_na, :]
-                    av_optim = hetlmm.model(y_l, X_l, V_l, G_l).optimize_model(null_optim['h2'])
+                    av_optim = hetlmm.model(y_l, X_l, V_l, G_l).optimize_model(h2_init)
+                    h2_init = av_optim['h2']
                 else:
                     av_optim= hetlm.model(y_l, X_l, V_l).optimize_model()
                 # Check convergence success
