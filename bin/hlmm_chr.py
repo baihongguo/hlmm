@@ -110,7 +110,7 @@ if __name__ == '__main__':
                         help='Fit covariates for each locus. Default is to fit for null model and project out (mean) and rescale (variance)',
                         default=False)
     parser.add_argument('--random_gts',type=str,help='Location of the BED file with the genotypes of the SNPs that random effects should be modelled for',default=None)
-    parser.add_argument('--random_gts_fam',action='store_true',defaul=False,help='Random effect design matrix supplied as text file with columns: FID, IID, x1, x2, ...')
+    parser.add_argument('--random_gts_fam',action='store_true',default=False,help='Random effect design matrix supplied as text file with columns: FID, IID, x1, x2, ...')
     parser.add_argument('--h2_init',type=float,help='Initial value for variance explained by random effects (default 0.05)',
                         default=0.05)
     parser.add_argument('--phen_index',type=int,help='If the phenotype file contains multiple phenotypes, which phenotype should be analysed (default 1, first)',
