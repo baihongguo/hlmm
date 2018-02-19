@@ -12,7 +12,8 @@ The phenotype file and covariate file formats are the same: FID, IID, Trait1, Tr
 
 If you specify a random_gts.bed file with the option --random_gts, the script will model random effects for
 all of the variants specified in random_gts.bed. If no --random_gts are specified, then heteroskedastic linear
-models are used, without random effects.
+models are used, without random effects. If you add the flag --random_gts_txt, the program assumes that the file
+specified for --random_gts is a text file formatted as: FID, IID, x1, x2, ...
 
 Minimally, the script will output a file outprefix.models.gz, which contains a table of the additive
 and log-linear variance effects estimated for each variant in the bed file.
@@ -110,7 +111,7 @@ if __name__ == '__main__':
                         help='Fit covariates for each locus. Default is to fit for null model and project out (mean) and rescale (variance)',
                         default=False)
     parser.add_argument('--random_gts',type=str,help='Location of the BED file with the genotypes of the SNPs that random effects should be modelled for',default=None)
-    parser.add_argument('--random_gts_fam',action='store_true',default=False,help='Random effect design matrix supplied as text file with columns: FID, IID, x1, x2, ...')
+    parser.add_argument('--random_gts_txt',action='store_true',default=False,help='Random effect design matrix supplied as text file with columns: FID, IID, x1, x2, ... Overrides assumed .bed formatting')
     parser.add_argument('--h2_init',type=float,help='Initial value for variance explained by random effects (default 0.05)',
                         default=0.05)
     parser.add_argument('--phen_index',type=int,help='If the phenotype file contains multiple phenotypes, which phenotype should be analysed (default 1, first)',
@@ -218,7 +219,7 @@ if __name__ == '__main__':
 
     #### Read random effect genotypes ####
     if args.random_gts is not None:
-        if args.random_gts_fam:
+        if args.random_gts_txt:
             random_gts_f = Pheno(args.random_gts)
         else:
             random_gts_f = Bed(args.random_gts)

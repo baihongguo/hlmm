@@ -1,26 +1,22 @@
 """
-Usage: hlmm_chr.py
+Usage: fit_hlmm_model.py
 
-This script fits heteroskedastic linear models or heteroskedastic linear mixed models to a sequence of genetic variants
-contained in a .bed file. You need to specify the genotypes.bed file, which also has genotypes.bim and genotypes.fam in
-the same directory, along with the start and end indices of segment you want the script to fit models to.
-The script runs from start to end-1 inclusive, and the first SNP has index 0.
-The script is designed to run on a chromosome segment to facilitate parallel computing on a cluster.
+This script fits a heteroskedastic linear model or a heteroskedastic linear mixed model to a given response (phenotype), mean covariates,
+variance covariates, and variables to model random effects for.
 
-The phenotype file and covariate file formats are the same: FID, IID, Trait1, Trait2, ...
+The phenotype (response) file and covariate file formats are the same: FID, IID, Trait1, Trait2, ...
 
 If you specify a random_gts.bed file with the option --random_gts, the script will model random effects for
 all of the variants specified in random_gts.bed. If no --random_gts are specified, then heteroskedastic linear
-models are used, without random effects.
+models are used, without random effects. If you add the flag --random_gts_txt, the program assumes that the file
+specified for --random_gts is a text file formatted as: FID, IID, x1, x2, ...
 
-Minimally, the script will output a file outprefix.models.gz, which contains a table of the additive
-and log-linear variance effects estimated for each variant in the bed file.
+If mean and/or variance covariates are specified, the script will output two files: outprefix.mean_effects.txt, containing the estimated mean
+effects and their standard errors; and outprefix.variance_effects.txt, containing the estimated log-linear
+variance effects and their standard errors.
 
 If --random_gts are specified, the script will output an estimate of the variance of the random effects
 in the null model in outprefix.null_h2.txt. --no_h2_estimate suppresses this output.
-
-If covariates are also specified, it will output estimates of the covariate effects from the null model as
-outprefix.null_mean_effects.txt and outprefix.null_variance_effects.txt. --no_covariate_estimates suppresses this output.
 """
 
 from hlmm import hetlm
@@ -96,13 +92,14 @@ def read_covariates(covar_file,ids_to_match,missing):
 ######### Command line arguments #########
 if __name__ == '__main__':
     parser=argparse.ArgumentParser()
-    parser.add_argument('mean_covar',type=str,help='Location of mean covariate file (default None)',
-                        default=None)
-    parser.add_argument('var_covar',type=str,help='Location of variance covariate file (default None)',
-                        default=None)
     parser.add_argument('phenofile',type=str,help='Location of the phenotype file')
     parser.add_argument('outprefix',type=str,help='Location to output csv file with association statistics')
+    parser.add_argument('--mean_covar',type=str,help='Location of mean covariate file (default None)',
+                        default=None)
+    parser.add_argument('--var_covar',type=str,help='Location of variance covariate file (default None)',
+                        default=None)
     parser.add_argument('--random_gts',type=str,help='Location of the BED file with the genotypes of the SNPs that random effects should be modelled for',default=None)
+    parser.add_argument('--random_gts_txt',action='store_true',default=False,help='Random effect design matrix supplied as text file with columns: FID, IID, x1, x2, ... Overrides assumed .bed formatting')
     parser.add_argument('--h2_init',type=float,help='Initial value for variance explained by random effects (default 0.05)',
                         default=0.05)
     parser.add_argument('--phen_index',type=int,help='If the phenotype file contains multiple phenotypes, which phenotype should be analysed (default 1, first)',
@@ -111,6 +108,10 @@ if __name__ == '__main__':
     parser.add_argument('--no_h2_estimate',action='store_true',default=False,help='Suppress output of h2 estimate')
 
     args=parser.parse_args()
+
+    ##### Check minimal model is specified #####
+    if args.mean_covar is None and args.var_covar is None and args.random_gts is None:
+        raise(ValueError('Must specify at least one of: mean_covar, var_covar, random_gts'))
 
     ####################### Read in data #########################
     #### Read phenotype ###
@@ -173,7 +174,10 @@ if __name__ == '__main__':
 
     #### Read random effect genotypes ####
     if args.random_gts is not None:
-        random_gts_f = Bed(args.random_gts)
+        if args.random_gts_txt:
+            random_gts_f = Pheno(args.random_gts)
+        else:
+            random_gts_f = Bed(args.random_gts)
         random_gts_ids = np.array(random_gts_f.iid)
         random_gts_f = random_gts_f.read()
         # Match to phenotypes

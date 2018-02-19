@@ -18,8 +18,8 @@ The phenotype file and covariate file formats are the same: plain text files wit
 column is family ID, and the second column is individual ID; subsequent columns are phenotype or covariate
 observations. This is the same format used by GCTA and FaSTLMM.
 
-If you specify a random_gts.bed file with the option --random_gts, the script will fit HLMs (:class:`hetlm.model`),
-modelling random effects for the SNPs in random_gts.bed. If no --random_gts are specified, then HLMMs (:class:`hetlmm.model`)
+If you specify a random_gts.bed file with the option --random_gts, the script will fit HLMMs (:class:`hetlmm.model`),
+modelling random effects for the SNPs in random_gts.bed. If no --random_gts are specified, then HLMs (:class:`hetlm.model`)
 are used, without random effects.
 
 Minimally, the script will output a file outprefix.models.gz, which contains a table of the additive

@@ -15,6 +15,7 @@ Welcome to hlmm's documentation!
    hetlm
    hetlmm
    hlmm_chr
+   fit_hlmm_model
 
 Indices and tables
 ==================
