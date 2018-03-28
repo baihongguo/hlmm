@@ -16,7 +16,7 @@ effects and their standard errors; and outprefix.variance_effects.txt, containin
 variance effects and their standard errors.
 
 If --random_gts are specified, the script will output an estimate of the variance of the random effects
-in the null model in outprefix.null_h2.txt. --no_h2_estimate suppresses this output.
+in  outprefix.h2.txt. --no_h2_estimate suppresses this output.
 """
 
 from hlmm import hetlm
@@ -227,27 +227,29 @@ if __name__ == '__main__':
 
     ## Record fitting of model
     # Get print out for fixed mean effects
-    alpha_out=np.zeros((n_X,2))
-    alpha_out[:,0]=optim['alpha']
-    alpha_out[:,1]=optim['alpha_se']
-    # Rescale
-    if n_X>1:
-        for i in xrange(0,2):
-            alpha_out[1:n_X,i] = alpha_out[1:n_X,i]/X_stds
-    # Save
-    np.savetxt(args.outprefix + '.mean_effects.txt',
-               np.hstack((X_names.reshape((n_X, 1)), np.array(alpha_out, dtype='S20'))),
-               delimiter='\t', fmt='%s')
+    if args.mean_covar is not None:
+        alpha_out=np.zeros((n_X,2))
+        alpha_out[:,0]=optim['alpha']
+        alpha_out[:,1]=optim['alpha_se']
+        # Rescale
+        if n_X>1:
+            for i in xrange(0,2):
+                alpha_out[1:n_X,i] = alpha_out[1:n_X,i]/X_stds
+        # Save
+        np.savetxt(args.outprefix + '.mean_effects.txt',
+                   np.hstack((X_names.reshape((n_X, 1)), np.array(alpha_out, dtype='S20'))),
+                   delimiter='\t', fmt='%s')
 
     # variance effects
-    beta_out=np.zeros((n_V,2))
-    beta_out[0:n_V,0]=optim['beta']
-    beta_out[0:n_V,1]=optim['beta_se']
-    # Rescale
-    if n_V>1:
-        for i in xrange(0,2):
-            beta_out[1:n_X,i] = beta_out[1:n_X,i]/V_stds
-    # Save
-    np.savetxt(args.outprefix + '.variance_effects.txt',
-               np.hstack((V_names.reshape((n_V, 1)), np.array(beta_out, dtype='S20'))),
-               delimiter='\t', fmt='%s')
+    if args.var_covar is not None:
+        beta_out=np.zeros((n_V,2))
+        beta_out[0:n_V,0]=optim['beta']
+        beta_out[0:n_V,1]=optim['beta_se']
+        # Rescale
+        if n_V>1:
+            for i in xrange(0,2):
+                beta_out[1:n_X,i] = beta_out[1:n_X,i]/V_stds
+        # Save
+        np.savetxt(args.outprefix + '.variance_effects.txt',
+                   np.hstack((V_names.reshape((n_V, 1)), np.array(beta_out, dtype='S20'))),
+                   delimiter='\t', fmt='%s')

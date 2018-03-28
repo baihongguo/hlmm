@@ -19,26 +19,19 @@ modelling random effects for the SNPs in random_gts.bed. If no --random_gts are 
 are used, without random effects. If you add the flag --random_gts_txt, the program assumes that the file
 specified for --random_gts is a text file formatted as: FID, IID, x1, x2, ...
 
-If you specify a random_gts.bed file with the option --random_gts, the script will model random effects for
-all of the variants specified in random_gts.bed. If no --random_gts are specified, then heteroskedastic linear
-models are used, without random effects. If you add the flag --random_gts_txt, the program assumes that the file
-specified for --random_gts is a text file formatted as: FID, IID, x1, x2, ...
-
 If mean and/or variance covariates are specified, the script will output two files: outprefix.mean_effects.txt, containing the estimated mean
 effects and their standard errors; and outprefix.variance_effects.txt, containing the estimated log-linear
 variance effects and their standard errors.
 
 If --random_gts are specified, the script will output an estimate of the variance of the random effects
-in the null model in outprefix.null_h2.txt. --no_h2_estimate suppresses this output.
-The script runs from start to end-1 inclusive, and the first SNP has index 0.
-The script is designed to run on a chromosome segment to facilitate parallel computing on a cluster.
+in outprefix.h2.txt. --no_h2_estimate suppresses this output.
 
 **Arguments**
 
 Required positional arguments:
 
 **phenofile**
-   Location of the y file in PLINK format
+   Location of the phenotype (response) file with format: FID, IID, y1, y2, ...
 
 **outprefix**
    Location to output csv file with association statistics

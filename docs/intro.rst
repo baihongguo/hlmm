@@ -28,6 +28,10 @@ heteroskedastic linear mixed models to a contiguous segment of the genome.
 The script takes bed formatted genotypes as input. and can incorporate
 covariates for the fixed effects on the mean and/or variance.
 
+fit_hlmm_model.py (:doc:`hlmm_chr`): command line script that fits a heteroskedastic linear model or a
+heteroskedastic linear mixed model to a given response (phenotype), mean covariates,
+variance covariates, and variables to model random effects for.
+
 **Quick install**
 
 We recommend installing using pip (https://pip.pypa.io/en/stable/).

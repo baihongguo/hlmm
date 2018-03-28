@@ -143,7 +143,7 @@ if __name__ == '__main__':
         y = y[y_not_nan]
         pheno_ids = pheno_ids[y_not_nan,:]
     # Make id dictionary
-    print('Number of non-missing y observations: ' + str(y.shape[0]))
+    print('Number of non-missing phenotype observations: ' + str(y.shape[0]))
 
     ### Get covariates
     ## Get mean covariates
@@ -184,9 +184,11 @@ if __name__ == '__main__':
     # select subset to test
     if args.whole_chr:
         sid = test_chr.sid
+        pos = test_chr.pos
         test_chr = test_chr.read()
     else:
         sid = test_chr.sid[args.start:args.end]
+        pos = test_chr.pos[args.start:args.end]
         test_chr = test_chr[:, args.start:args.end].read()
     genotypes = test_chr.val
     # Get genotype matrix

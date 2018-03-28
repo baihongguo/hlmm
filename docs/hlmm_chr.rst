@@ -45,7 +45,7 @@ Required positional arguments:
    Index of SNP in genofile at which to finish computing test stats
 
 **phenofile**
-   Location of the y file in PLINK format
+   Location of the phenotype (response) file with format: FID, IID, y1, y2, ...
 
 **outprefix**
    Location to output csv file with association statistics
