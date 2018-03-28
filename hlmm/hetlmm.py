@@ -71,6 +71,9 @@ class model(object):
     def likelihood(self,beta,h2,negative=False):
         """
         Compute the log of the profile likelihood, the likelihood at the maximum likelihood for the fixed mean effects
+
+        Parameters
+        ----------
         beta : :class:`~numpy:numpy.array`
             value of fixed variance effects to compute likelihood for
         h2: :class:`float`
@@ -97,6 +100,8 @@ class model(object):
         Further, compute the gradient with respect to the fixed variance effects and the variance of the random effects.
         This forms the basis of the function passed to L-BFGS-B in order to find the maximum likelihood parameter estimates.
 
+        Parameters
+        ----------
         beta : :class:`~numpy:numpy.array`
             value of fixed variance effects to compute likelihood for
         h2: :class:`float`
@@ -210,10 +215,10 @@ class model(object):
         Returns
         -------
         optim : :class:`dict`
-            keys: MLEs ('alpha', fixed mean effects; 'beta', fixed variance effects),
+            keys: MLEs ('alpha', fixed mean effects; 'beta', fixed variance effects; 'h2', variance explained by random effects),
             their standard errors ('alpha_se', 'beta_se', 'h2_se'),
-            covariance matrix for sampling distribution of parameter vector ('par_cov', in order: alpha, beta, h2),,
-            maximum likelihood ('likelihood'), whether optimisation was successful ('success'),warnings from L-BFGS-B optimisation ('warnflag').
+            covariance matrix for sampling distribution of parameter vector ('par_cov', in order: alpha, beta, h2),
+            maximum likelihood ('likelihood'), whether optimisation was successful ('success'), warnings from L-BFGS-B optimisation ('warnflag').
         """
         # Initialise parameters
         init_params=np.zeros((self.n_fixed_variance+1))

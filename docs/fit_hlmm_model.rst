@@ -14,9 +14,9 @@ The phenotype (response) file and covariate file formats are the same: plain tex
 column is family ID, and the second column is individual ID; subsequent columns are phenotype or covariate
 observations. This is the same format used by GCTA and FaSTLMM.
 
-If you specify a random_gts.bed file with the option --random_gts, the script will fit HLMMs (:class:`hetlmm.model`),
-modelling random effects for the SNPs in random_gts.bed. If no --random_gts are specified, then HLMs (:class:`hetlm.model`)
-are used, without random effects. If you add the flag --random_gts_txt, the program assumes that the file
+If you specify a random_gts.bed file with the option --random_gts, the script will fit a HLMM (:class:`hetlmm.model`),
+modelling random effects for the SNPs in random_gts.bed. If no --random_gts are specified, then a HLM (:class:`hetlm.model`)
+is used, without random effects. If you add the flag --random_gts_txt, the program assumes that the file
 specified for --random_gts is a text file formatted as: FID, IID, x1, x2, ...
 
 If mean and/or variance covariates are specified, the script will output two files: outprefix.mean_effects.txt, containing the estimated mean

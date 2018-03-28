@@ -35,7 +35,7 @@ To fit HLMs (:class:`hetlm.model`) to the SNPs in test.bed, type
 
 This produces a file 'test.models.gz' containing the results of fitting HLMs (:class:`hetlm.model`) to all the SNPs in test.bed. This is a tab separated file with a header that can be read by R by typing the command
 
-   ``results=read.table('test.models.gz',header=T)``
+   ``results=read.table('test.models.gz',header=T,stringsAsFactors=F)``
 
 The columns in this output file are:
 

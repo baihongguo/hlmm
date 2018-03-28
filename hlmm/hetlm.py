@@ -167,7 +167,7 @@ class model(object):
         -------
         optim : :class:`dict`
             keys: MLEs ('alpha', fixed mean effects; 'beta', fixed variance effects),
-            their standard errors ('alpha_se', 'beta_se', 'h2_se'),
+            their standard errors ('alpha_se', 'beta_se'),
             covariance matrix for sampling distribution of parameter vectors ('beta_cov' and 'alpha_cov'),
             maximum likelihood ('likelihood'), whether optimisation was successful ('success'),
         """
