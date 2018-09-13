@@ -59,7 +59,7 @@ Options:
    Locaiton of variance covariate file (default no variance covariates)
 
 --fit_covariates
-   Fit covariates for each locus. Default is to fit covariates for the null model and project out (mean) and rescale (variance)'
+   Fit covariates for each locus. Default is to fit covariates for the null model and project out (mean) and rescale (variance)
 
 --random_gts
    Location of the BED file with the genotypes of the SNPs that random effects should be modelled for. If
@@ -122,6 +122,6 @@ Fitting covariates:
 Before fitting locus specific models, the script will first fit a null model including the mean covariates in m_covariates.fam and the variance covariates in v_covariates.fam.
 The script will output the null model estimates of the mean covariates in phenotype.null_mean_effects.txt and
 null model estimates of the variance covariates in phenotypes.null_variance_effects.txt, unless --no_covariate_estimates is added to the command.
-Unless --fit_covariates is added to the command, phenotype is adjusted based on the null model estimates of the mean
+Unless --fit_covariates is added to the command, the phenotype is adjusted based on the null model estimates of the mean
 covariate effects and variance covariate effects. The adjusted phenotype is used to fit locus specific models without
-fitting the mean and variance covariates.
+fitting the mean and variance covariates for each locus.

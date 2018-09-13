@@ -26,7 +26,7 @@ the likelihood and their sampling distribution.
 
 hlmm_chr.py: command line script that fits heteroskedastic linear models or 
 heteroskedastic linear mixed models to a contiguous segment of the genome.
-The script takes bed formatted genotypes as input. and can incorporate
+The script takes bed formatted genotypes as input and can incorporate
 covariates for the fixed effects on the mean and/or variance. 
 
 # Easy installation
