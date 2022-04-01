@@ -17,7 +17,7 @@ class test_hetlm_functions(unittest.TestCase):
                 for c in [1,2,10]:
                     if c>n:
                         c=n
-                    for i in xrange(0,10**2):
+                    for i in range(0,10**2):
                         X=np.random.randn((n*c)).reshape((n,c))
                         V = np.random.randn((n * v)).reshape((n, v))
                         y=np.random.randn((n))
@@ -42,7 +42,7 @@ class test_hetlm_functions(unittest.TestCase):
                 for c in [1,2,10]:
                     if c>n:
                         c=n
-                    for i in xrange(0,10**2):
+                    for i in range(0,10**2):
                         X=np.random.randn((n*c)).reshape((n,c))
                         V=np.random.randn((n*v)).reshape((n,v))
                         alpha=np.random.randn((c))
@@ -65,7 +65,7 @@ class test_hetlm_functions(unittest.TestCase):
                 for c in [1,2,10]:
                     if c>n:
                         c=n
-                    for i in xrange(0,10**2):
+                    for i in range(0,10**2):
                         X=np.random.randn((n*c)).reshape((n,c))
                         V = np.random.randn((n * v)).reshape((n, v))
                         y=np.random.randn((n))

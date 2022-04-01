@@ -16,7 +16,7 @@ class test_hlmm_functions(unittest.TestCase):
                 for c in [2]:
                     if c>n:
                         c=n
-                    for i in xrange(0,10):
+                    for i in range(0,10):
                         l=100
                         alpha=np.random.randn((c))
                         beta = np.random.randn((v))/10
@@ -40,7 +40,7 @@ class test_hlmm_functions(unittest.TestCase):
                 for c in [2]:
                     if c>n:
                         c=n
-                    for i in xrange(0,10):
+                    for i in range(0,10):
                         l = 100
                         alpha = np.random.randn((c))
                         beta = np.random.randn((v)) / 10
@@ -59,7 +59,7 @@ class test_hlmm_functions(unittest.TestCase):
                 for c in [2]:
                     if c>n:
                         c=n
-                    for i in xrange(0,10):
+                    for i in range(0,10):
                         l = 100
                         alpha = np.random.randn((c))/10
                         beta = np.random.randn((v)) / 10
@@ -73,7 +73,7 @@ class test_hlmm_functions(unittest.TestCase):
                             return model.likelihood(vpars[0:v],vpars[v],negative=True)
                         num_grad=np.zeros((v+1))
                         diffs=np.identity(v+1)*10**(-6)
-                        for i in xrange(0,v+1):
+                        for i in range(0,v+1):
                             num_grad[i]=(likelihood(vpar+diffs[i,:])-likelihood(vpar-diffs[i,:]))/(2*10**(-6))
                         # Compute analytically
                         testing.assert_almost_equal(num_grad,gradb.reshape((v+1)),decimal=5)
