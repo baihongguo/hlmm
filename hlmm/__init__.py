@@ -1,2 +1,2 @@
-import hetlm
-import hetlmm
+import hlmm.hetlm
+import hlmm.hetlmm
