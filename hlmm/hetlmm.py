@@ -227,7 +227,7 @@ class model(object):
         init_params[0:self.n_fixed_variance] = hetlm.model(self.y, self.X, self.V).optimize_model()['beta']
         ## Set parameter boundaries
         # boundaries for beta
-        parbounds = [(None,None) for i in xrange(0,self.n_fixed_variance)]
+        parbounds = [(None,None) for i in range(0,self.n_fixed_variance)]
         # boundaries for h2
         parbounds.append((0.00001, None))
         # Optimize
@@ -276,7 +276,7 @@ class model(object):
         n_pars=self.n_fixed_mean+self.n_fixed_variance+1
         H = np.zeros((n_pars, n_pars))
         # Calculate alpha components of hessian
-        for p in xrange(0, self.n_fixed_mean):
+        for p in range(0, self.n_fixed_mean):
             # Calculate change in alpha gradient
             d = np.identity(self.n_fixed_mean)*dx
             resid_upper = (self.y - self.X.dot(alpha + d[p,:]))
@@ -294,7 +294,7 @@ class model(object):
                                                                                               Lambda_inv)) / (2.0 * dx)
             H[p, n_pars - 1] = H[n_pars - 1, p]
         # Calculate beta components of Hessian
-        for p in xrange(self.n_fixed_mean, n_pars - 1):
+        for p in range(self.n_fixed_mean, n_pars - 1):
             d = np.identity(self.n_fixed_variance) * dx
             # Changed matrices
             D_inv_upper = np.exp(-self.V.dot(beta + d[p-self.n_fixed_mean,:]))
