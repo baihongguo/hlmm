@@ -50,7 +50,7 @@ def vector_out(alpha,se,digits=4):
     else:
         pvals=[neglog10pval(x,1) for x in x2]
         alpha_print=''
-        for i in xrange(0,len(alpha)-1):
+        for i in range(0,len(alpha)-1):
             alpha_print+=str(round(alpha[i],digits))+'\t'+str(round(se[i],digits))+'\t'+str(round(t[i],digits))+'\t'+str(round(pvals[i],digits))+'\t'
         i+=1
         alpha_print+=str(round(alpha[i],digits))+'\t'+str(round(se[i],digits))+'\t'+str(round(t[i],digits))+'\t'+str(round(pvals[i],digits))
@@ -61,7 +61,7 @@ def id_dict_make(ids):
     if not type(ids)==np.ndarray:
         raise(ValueError('Unsupported ID type: should be numpy nd.array'))
     id_dict={}
-    for id_index in xrange(0,len(ids)):
+    for id_index in range(0,len(ids)):
         id_dict[tuple(ids[id_index,:])]=id_index
     return id_dict
 
@@ -88,7 +88,7 @@ def read_covariates(covar_file,ids_to_match,missing):
     id_dict = id_dict_make(ids)
     # Match with pheno_ids
     ids_to_match_tuples = [tuple(x) for x in ids_to_match]
-    common_ids = id_dict.viewkeys() & set(ids_to_match_tuples)
+    common_ids = id_dict.keys() & set(ids_to_match_tuples)
     pheno_in = np.array([(tuple(x) in common_ids) for x in ids_to_match])
     match_ids = ids_to_match[pheno_in,:]
     X_id_match = np.array([id_dict[tuple(x)] for x in match_ids])
@@ -202,7 +202,7 @@ if __name__ == '__main__':
     # Get sample ids
     geno_id_dict = id_dict_make(np.array(test_chr.iid))
     # Intersect with phenotype IDs
-    ids_in_common = {tuple(x) for x in pheno_ids} & geno_id_dict.viewkeys()
+    ids_in_common = {tuple(x) for x in pheno_ids} & geno_id_dict.keys()
     pheno_ids_in_common = np.array([tuple(x) in ids_in_common for x in pheno_ids])
     y = y[pheno_ids_in_common]
     pheno_ids = pheno_ids[pheno_ids_in_common,:]
@@ -231,7 +231,7 @@ if __name__ == '__main__':
         G_random = random_gts_f.val
         G = np.empty((genotypes.shape[0], G_random.shape[1]))
         G[:] = np.nan
-        for i in xrange(0, random_gts_ids.shape[0]):
+        for i in range(0, random_gts_ids.shape[0]):
             if tuple(random_gts_ids[i, :]) in pheno_id_dict:
                 G[pheno_id_dict[tuple(random_gts_ids[i, :])], :] = G_random[i, :]
         del G_random
@@ -241,7 +241,7 @@ if __name__ == '__main__':
         gts_with_obs = list()
         if np.sum(random_gts_NAs) > 0:
             print('Mean imputing missing genotypes in random effect design matrix')
-            for i in xrange(0, G.shape[1]):
+            for i in range(0, G.shape[1]):
                 if random_gts_NAs[i] < G.shape[0]:
                     gts_with_obs.append(i)
                     if random_gts_NAs[i] > 0:
@@ -266,7 +266,8 @@ if __name__ == '__main__':
     outfile=open(args.outprefix+'.models.gz',write_mode)
     if not args.append:
         header='SNP\tn\tfrequency\tlikelihood\tadd\tadd_se\tadd_t\tadd_pval\tvar\tvar_se\tvar_t\tvar_pval\tav_pval\n'
-        outfile.write(header)
+        header_as_bytes = str.encode(header)
+        outfile.write(header_as_bytes)
 
     ######### Fit Null Model ##########
     ## Get initial guesses for null model
@@ -281,7 +282,7 @@ if __name__ == '__main__':
     alpha_out[:,1]=null_optim['alpha_se']
     # Rescale
     if n_X>1:
-        for i in xrange(0,2):
+        for i in range(0,2):
             alpha_out[1:n_X,i] = alpha_out[1:n_X,i]/X_stds
     if not args.append and not args.no_covariate_estimates and args.mean_covar is not None:
         np.savetxt(args.outprefix + '.null_mean_effects.txt',
@@ -293,7 +294,7 @@ if __name__ == '__main__':
     beta_out[0:n_V,1]=null_optim['beta_se']
     # Rescale
     if n_V>1:
-        for i in xrange(0,2):
+        for i in range(0,2):
             beta_out[1:n_X,i] = beta_out[1:n_X,i]/V_stds
     if not args.append and not args.no_covariate_estimates and args.var_covar is not None:
         np.savetxt(args.outprefix + '.null_variance_effects.txt',
@@ -330,7 +331,7 @@ if __name__ == '__main__':
 
     ############### Loop through loci and fit AV models ######################
     print('Fitting models for specified loci')
-    for loc in xrange(0,chr_length):
+    for loc in range(0,chr_length):
         # Filler for output if locus doesn't pass thresholds
         additive_av_out='NaN\tNaN\tNaN\tNaN'
         variance_out='NaN\tNaN\tNaN\tNaN'
@@ -378,5 +379,5 @@ if __name__ == '__main__':
                     av_pval=neglog10pval((av_optim['alpha'][n_X]/av_optim['alpha_se'][n_X])**2+(av_optim['beta'][n_V]/av_optim['beta_se'][n_V])**2,2)
                 else:
                     print('Maximisation of likelihood failed for for '+sid[loc])
-        outfile.write(sid[loc] + '\t'+str(n_l)+'\t'+ str(allele_frq)+'\t'+str(likelihood)+'\t'+additive_av_out+'\t'+variance_out+'\t'+str(round(av_pval,6))+'\n')
+        outfile.write(str.encode(sid[loc] + '\t'+str(n_l)+'\t'+ str(allele_frq)+'\t'+str(likelihood)+'\t'+additive_av_out+'\t'+variance_out+'\t'+str(round(av_pval,6))+'\n'))
     outfile.close()
